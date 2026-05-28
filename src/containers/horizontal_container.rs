@@ -3,6 +3,7 @@ use crate::{layout_traits::{KnownXSizeElement, KnownYSizeElement, Render}, posit
 /// put elements one after the other horizontally
 /// elements must have a known size
 /// if your elements don't have a known size, consider using (TODO)
+/// probably needs to box the elements? or can I use references somehow
 pub struct HorizontalContainer<T> {
     children: Vec<T>,
 }
