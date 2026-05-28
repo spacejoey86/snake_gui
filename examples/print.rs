@@ -1,14 +1,24 @@
 use angui::{
-    backends::{self, print_backend::CharRectangle}, containers::horizontal_container::HorizontalContainer, layout_traits::Render,
-    position::Position, widgets::rectangle::RectangleElement,
+    backends::{
+        self,
+        print_backend::{CharRectangle, PrintBackendCTX},
+    },
+    containers::horizontal_container::HorizontalContainer,
+    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    position::Position,
+    widgets::rectangle::RectangleElement,
 };
+
+trait SizedPrint: Render<PrintBackendCTX> + KnownXSizeElement + KnownYSizeElement {}
+impl<T> SizedPrint for T where T: Render<PrintBackendCTX> + KnownXSizeElement + KnownYSizeElement {}
 
 fn main() {
     let mut ctx = backends::print_backend::PrintBackendCTX::new(150, 50);
 
     let root = HorizontalContainer::new()
-        .add_child(CharRectangle::new(30, 10, 'a'))
-        .add_child(CharRectangle::new(5, 15, 'b'));
+        .add_child(Box::new(CharRectangle::new(30, 10, 'a')) as Box<dyn SizedPrint>)
+        .add_child(Box::new(CharRectangle::new(5, 15, 'b')))
+        .add_child(Box::new(RectangleElement::new(2, 2)));
 
     root.render(&mut ctx, Position::new(0, 0)); // render onto buffer
     ctx.display(); // print the buffer to the terminal

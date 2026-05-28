@@ -11,13 +11,6 @@ pub trait KnownYSizeElement {
     fn get_y_size(&self) -> usize;
 }
 
-/// knows both x and y sizes
-/// does this need to be its own trait?
-/// might be convenient for writing signatures?
-pub trait SizedElement : KnownXSizeElement + KnownYSizeElement {
-
-}
-
 /// like egui Widget trait
 /// given sizes (?) render yourself?
 /// for a GUI on a screen, the top level has a size

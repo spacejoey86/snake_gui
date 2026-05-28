@@ -7,15 +7,8 @@ use crate::{
 /// elements must have a known size
 /// if your elements don't have a known size, consider using (TODO)
 /// probably needs to box the elements? or can I use references somehow
-pub struct HorizontalContainer<T> {
-    children: Vec<T>,
-}
-
-impl<T> HorizontalContainer<T> {
-    pub fn add_child(mut self, child: T) -> Self {
-        self.children.push(child);
-        return self;
-    }
+pub struct HorizontalContainer<T: ?Sized> {
+    children: Vec<Box<T>>,
 }
 
 impl<T> KnownXSizeElement for HorizontalContainer<T>
@@ -40,7 +33,7 @@ where
     }
 }
 
-impl<T, BackendContext> Render<BackendContext> for HorizontalContainer<T>
+impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalContainer<T>
 where
     T: KnownXSizeElement + Render<BackendContext>,
 {
@@ -53,7 +46,12 @@ where
     }
 }
 
-impl<T> HorizontalContainer<T> {
+impl<T: ?Sized> HorizontalContainer<T> {
+    pub fn add_child(mut self, child: Box<T>) -> Self {
+        self.children.push(child);
+        return self;
+    }
+
     pub fn new() -> Self {
         Self { children: vec![] }
     }
