@@ -10,6 +10,6 @@ fn main() {
         .add_child(RectangleElement::new(30, 10))
         .add_child(RectangleElement::new(5, 15));
 
-    root.render(&mut ctx, Position::new(0, 0));
-    ctx.display();
+    root.render(&mut ctx, Position::new(0, 0)); // render onto buffer
+    ctx.display(); // print the buffer to the terminal
 }
