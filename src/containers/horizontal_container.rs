@@ -1,4 +1,7 @@
-use crate::{layout_traits::{KnownXSizeElement, KnownYSizeElement, Render}, position::Position};
+use crate::{
+    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    position::Position,
+};
 
 /// put elements one after the other horizontally
 /// elements must have a known size
@@ -39,7 +42,7 @@ where
 
 impl<T, BackendContext> Render<BackendContext> for HorizontalContainer<T>
 where
-    T : KnownXSizeElement + Render<BackendContext>
+    T: KnownXSizeElement + Render<BackendContext>,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
         let mut x_offset = 0;
@@ -47,5 +50,11 @@ where
             child.render(ctx, top_left + Position::new(x_offset, 0));
             x_offset += child.get_x_size()
         }
+    }
+}
+
+impl<T> HorizontalContainer<T> {
+    pub fn new() -> Self {
+        Self { children: vec![] }
     }
 }

@@ -1,0 +1,15 @@
+use angui::{
+    backends, containers::horizontal_container::HorizontalContainer, layout_traits::Render,
+    position::Position, widgets::rectangle::RectangleElement,
+};
+
+fn main() {
+    let mut ctx = backends::print_backend::PrintBackendCTX::new(150, 50);
+
+    let root = HorizontalContainer::new()
+        .add_child(RectangleElement::new(30, 10))
+        .add_child(RectangleElement::new(5, 15));
+
+    root.render(&mut ctx, Position::new(0, 0));
+    ctx.display();
+}
