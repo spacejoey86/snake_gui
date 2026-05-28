@@ -1,4 +1,7 @@
-use crate::{layout_traits::Render, widgets::rectangle::RectangleElement};
+use crate::{
+    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    widgets::rectangle::RectangleElement,
+};
 
 pub struct PrintBackendCTX {
     pub width: usize,
@@ -17,7 +20,11 @@ impl PrintBackendCTX {
 
     pub fn display(self) {
         for line in self.buffer {
-            println!("{}", line.iter().fold("".to_string(), |l, r| format!("{}{}", l, r).to_string()))
+            println!(
+                "{}",
+                line.iter()
+                    .fold("".to_string(), |l, r| format!("{}{}", l, r).to_string())
+            )
         }
     }
 }
@@ -29,5 +36,43 @@ impl Render<PrintBackendCTX> for RectangleElement {
                 ctx.buffer[top_left.y + row][top_left.x + column] = '█';
             }
         }
+    }
+}
+
+pub struct CharRectangle {
+    width: usize,
+    height: usize,
+    char: char,
+}
+
+impl CharRectangle {
+    pub fn new(width: usize, height: usize, char: char) -> Self {
+        Self {
+            width,
+            height,
+            char,
+        }
+    }
+}
+
+impl Render<PrintBackendCTX> for CharRectangle {
+    fn render(&self, ctx: &mut PrintBackendCTX, top_left: crate::position::Position) {
+        for y in 0..self.height {
+            for x in 0..self.width {
+                ctx.buffer[top_left.y + y][top_left.x + x] = self.char;
+            }
+        }
+    }
+}
+
+impl KnownXSizeElement for CharRectangle {
+    fn get_x_size(&self) -> usize {
+        self.width
+    }
+}
+
+impl KnownYSizeElement for CharRectangle {
+    fn get_y_size(&self) -> usize {
+        self.height
     }
 }
