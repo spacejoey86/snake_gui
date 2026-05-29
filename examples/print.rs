@@ -2,11 +2,7 @@ use angui::{
     backends::{
         self,
         print_backend::{CharRectangle, PrintBackendCTX},
-    },
-    containers::horizontal_container::HorizontalContainer,
-    traits::{FixedHeight, FixedWidth, Render},
-    position::Position,
-    widgets::{label::Label, rectangle::RectangleElement},
+    }, containers::{horizontal_container::HorizontalContainer, padding_container::PaddingContainer}, position::Position, traits::{FixedHeight, FixedWidth, Render}, widgets::{label::Label, rectangle::RectangleElement}
 };
 
 trait SizedPrint: Render<PrintBackendCTX> + FixedWidth + FixedHeight {}
@@ -17,7 +13,7 @@ fn main() {
 
     let root = HorizontalContainer::new()
         .add_child(Box::new(CharRectangle::new(30, 10, 'a')) as Box<dyn SizedPrint>)
-        .add_child(Box::new(Label::new("Test label")))
+        .add_child(PaddingContainer::all(Box::new(Label::new("Test label")), 1))
         .add_child(Box::new(CharRectangle::new(5, 15, 'b')))
         .add_child(Box::new(RectangleElement::new(2, 2)));
 
