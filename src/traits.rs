@@ -25,7 +25,7 @@ where
     T: ?Sized + Render<BackendContext>,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
-        (**self).render(ctx, top_left);
+        self.as_ref().render(ctx, top_left);
     }
 }
 
