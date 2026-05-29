@@ -1,5 +1,5 @@
 use crate::{
-    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    layout_traits::{FixedWidth, FixedHeight, Render},
     position::Position,
 };
 
@@ -11,18 +11,18 @@ pub struct HorizontalContainer<T: ?Sized> {
     children: Vec<Box<T>>,
 }
 
-impl<T> KnownXSizeElement for HorizontalContainer<T>
+impl<T> FixedWidth for HorizontalContainer<T>
 where
-    T: KnownXSizeElement,
+    T: FixedWidth,
 {
     fn get_x_size(&self) -> usize {
         self.children.iter().map(|child| child.get_x_size()).sum()
     }
 }
 
-impl<T> KnownYSizeElement for HorizontalContainer<T>
+impl<T> FixedHeight for HorizontalContainer<T>
 where
-    T: KnownYSizeElement,
+    T: FixedHeight,
 {
     fn get_y_size(&self) -> usize {
         self.children
@@ -35,7 +35,7 @@ where
 
 impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalContainer<T>
 where
-    T: KnownXSizeElement + Render<BackendContext>,
+    T: FixedWidth + Render<BackendContext>,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
         let mut x_offset = 0;

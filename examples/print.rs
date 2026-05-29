@@ -4,13 +4,13 @@ use angui::{
         print_backend::{CharRectangle, PrintBackendCTX},
     },
     containers::horizontal_container::HorizontalContainer,
-    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    layout_traits::{FixedWidth, FixedHeight, Render},
     position::Position,
     widgets::rectangle::RectangleElement,
 };
 
-trait SizedPrint: Render<PrintBackendCTX> + KnownXSizeElement + KnownYSizeElement {}
-impl<T> SizedPrint for T where T: Render<PrintBackendCTX> + KnownXSizeElement + KnownYSizeElement {}
+trait SizedPrint: Render<PrintBackendCTX> + FixedWidth + FixedHeight {}
+impl<T> SizedPrint for T where T: Render<PrintBackendCTX> + FixedWidth + FixedHeight {}
 
 fn main() {
     let mut ctx = backends::print_backend::PrintBackendCTX::new(150, 50);

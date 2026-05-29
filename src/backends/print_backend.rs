@@ -1,5 +1,5 @@
 use crate::{
-    layout_traits::{KnownXSizeElement, KnownYSizeElement, Render},
+    layout_traits::{FixedWidth, FixedHeight, Render},
     widgets::rectangle::RectangleElement,
 };
 
@@ -65,13 +65,13 @@ impl Render<PrintBackendCTX> for CharRectangle {
     }
 }
 
-impl KnownXSizeElement for CharRectangle {
+impl FixedWidth for CharRectangle {
     fn get_x_size(&self) -> usize {
         self.width
     }
 }
 
-impl KnownYSizeElement for CharRectangle {
+impl FixedHeight for CharRectangle {
     fn get_y_size(&self) -> usize {
         self.height
     }

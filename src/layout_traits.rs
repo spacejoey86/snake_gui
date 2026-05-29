@@ -3,11 +3,11 @@ use crate::position::Position;
 pub trait UnsizedElement {}
 
 /// a ui element that can calculate it's X size independently of parents
-pub trait KnownXSizeElement {
+pub trait FixedWidth {
     fn get_x_size(&self) -> usize;
 }
 /// a ui element that can calculate it's Y size independently of parents
-pub trait KnownYSizeElement {
+pub trait FixedHeight {
     fn get_y_size(&self) -> usize;
 }
 
