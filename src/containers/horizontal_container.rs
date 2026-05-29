@@ -58,8 +58,12 @@ where
     }
 }
 
-impl<T: ?Sized> HorizontalContainer<T> {
-    pub fn add_child(mut self, child: Box<T>) -> Self {
+/// trait to help rust infer types
+pub trait ContainerElement<BackendContext>: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
+impl<T, BackendContext> ContainerElement<BackendContext> for T where T: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
+
+impl<T> HorizontalContainer<dyn ContainerElement<T>> {
+    pub fn add_child(mut self, child: Box<dyn ContainerElement<T>>) -> Self {
         self.children.push(child);
         return self;
     }

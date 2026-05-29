@@ -20,6 +20,15 @@ pub trait Render<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position);
 }
 
+impl<T, BackendContext> Render<BackendContext> for Box<T>
+where
+    T: ?Sized + Render<BackendContext>,
+{
+    fn render(&self, ctx: &mut BackendContext, top_left: Position) {
+        (**self).render(ctx, top_left);
+    }
+}
+
 pub trait GrowingWidth {
     fn min_width(&self) -> usize;
 }
