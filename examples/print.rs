@@ -9,7 +9,7 @@ use angui::{
     },
     position::Position,
     traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
-    widgets::{label::Label, separator::VerticalSeparator},
+    widgets::{label::Label, separator::VerticalSeparator, spacer::HorizontalSpacer},
 };
 use assert_impl_trait::assert_impl;
 
@@ -23,6 +23,7 @@ fn main() {
             .add_child(VerticalSeparator::new())
             .add_child(PaddingContainer::all(Label::new("Test label"), 1))
             .add_child(CharRectangle::new(5, 15, 'b'))
+            .add_child(HorizontalSpacer::new(1))
             .add_child(CharRectangle::new(3, 3, 'c'))
     )));
 
