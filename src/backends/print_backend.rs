@@ -1,6 +1,6 @@
 use crate::{
-    layout_traits::{FixedWidth, FixedHeight, Render},
-    widgets::rectangle::RectangleElement,
+    layout_traits::{FixedHeight, FixedWidth, Render},
+    widgets::{label::Label, rectangle::RectangleElement},
 };
 
 pub struct PrintBackendCTX {
@@ -74,5 +74,25 @@ impl FixedWidth for CharRectangle {
 impl FixedHeight for CharRectangle {
     fn get_y_size(&self) -> usize {
         self.height
+    }
+}
+
+impl FixedHeight for Label {
+    fn get_y_size(&self) -> usize {
+        1
+    }
+}
+
+impl FixedWidth for Label {
+    fn get_x_size(&self) -> usize {
+        self.text.len()
+    }
+}
+
+impl Render<PrintBackendCTX> for Label {
+    fn render(&self, ctx: &mut PrintBackendCTX, top_left: crate::position::Position) {
+        for (i, char) in self.text.chars().enumerate() {
+            ctx.buffer[top_left.y][top_left.x + i] = char
+        }
     }
 }
