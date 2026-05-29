@@ -4,6 +4,7 @@ use crate::{
 };
 
 mod widgets;
+mod containers;
 pub use widgets::char_rectangle::CharRectangle;
 
 pub struct PrintBackendCTX {

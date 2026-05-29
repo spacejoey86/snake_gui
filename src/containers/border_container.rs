@@ -1,0 +1,9 @@
+pub struct BorderContainer<T> {
+    pub child: Box<T>,
+}
+
+impl<T> BorderContainer<T> {
+    pub fn new(child: Box<T>) -> Box<Self> {
+        Box::new(Self { child })
+    }
+}
