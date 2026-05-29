@@ -1,5 +1,5 @@
 use angui::{
-    backends::{self, print_backend::CharRectangle},
+    backends::print_backend::{CharRectangle, PrintBackendCTX},
     containers::{
         border_container::BorderContainer, horizontal_container::HorizontalContainer,
         padding_container::PaddingContainer,
@@ -20,7 +20,7 @@ fn main() {
             .add_child(CharRectangle::new(3, 3, 'c')),
     );
 
-    let mut ctx = backends::print_backend::PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
+    let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
     Render::render(&root, &mut ctx, Position::new(0, 0)); // render onto buffer
     ctx.display(); // print the buffer to the terminal
 }
