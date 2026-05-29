@@ -9,6 +9,7 @@ use crate::{
 /// probably needs to box the elements? or can I use references somehow
 pub struct HorizontalContainer<T: ?Sized> {
     children: Vec<Box<T>>,
+    spacing: usize,
 }
 
 impl<T: ?Sized> FixedWidth for HorizontalContainer<T>
@@ -16,7 +17,12 @@ where
     T: FixedWidth,
 {
     fn width(&self) -> usize {
-        self.children.iter().map(|child| child.width()).sum()
+        self.spacing * self.children.len()
+            + self
+                .children
+                .iter()
+                .map(|child| child.width())
+                .sum::<usize>()
     }
 }
 
@@ -42,7 +48,7 @@ where
         let height = self.height();
         for child in self.children.iter() {
             child.render(ctx, top_left + Position::new(x_offset, 0), height);
-            x_offset += child.width()
+            x_offset += child.width() + self.spacing
         }
     }
 }
@@ -53,7 +59,10 @@ impl<T: ?Sized> HorizontalContainer<T> {
         return self;
     }
 
-    pub fn new() -> Box<Self> {
-        Box::new(Self { children: vec![] })
+    pub fn new(spacing: usize) -> Box<Self> {
+        Box::new(Self {
+            children: vec![],
+            spacing,
+        })
     }
 }

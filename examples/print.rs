@@ -18,7 +18,7 @@ impl<T> SizedPrint for T where T: RenderGrowHeight<PrintBackendCTX> + FixedWidth
 
 fn main() {
     let root = Box::leak(BorderContainer::new(Box::new(
-        HorizontalContainer::new()
+        HorizontalContainer::new(1)
             .add_child(CharRectangle::new(30, 10, 'a') as Box<dyn SizedPrint>)
             .add_child(VerticalSeparator::new())
             .add_child(PaddingContainer::all(Label::new("Test label"), 1))
