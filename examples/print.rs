@@ -4,7 +4,7 @@ use angui::{
         print_backend::{CharRectangle, PrintBackendCTX},
     },
     containers::horizontal_container::HorizontalContainer,
-    layout_traits::{FixedHeight, FixedWidth, Render},
+    traits::{FixedHeight, FixedWidth, Render},
     position::Position,
     widgets::{label::Label, rectangle::RectangleElement},
 };

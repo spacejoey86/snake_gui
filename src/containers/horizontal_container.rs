@@ -1,5 +1,5 @@
 use crate::{
-    layout_traits::{FixedWidth, FixedHeight, Render},
+    traits::{FixedWidth, FixedHeight, Render},
     position::Position,
 };
 
@@ -15,8 +15,8 @@ impl<T> FixedWidth for HorizontalContainer<T>
 where
     T: FixedWidth,
 {
-    fn get_x_size(&self) -> usize {
-        self.children.iter().map(|child| child.get_x_size()).sum()
+    fn width(&self) -> usize {
+        self.children.iter().map(|child| child.width()).sum()
     }
 }
 
@@ -24,10 +24,10 @@ impl<T> FixedHeight for HorizontalContainer<T>
 where
     T: FixedHeight,
 {
-    fn get_y_size(&self) -> usize {
+    fn height(&self) -> usize {
         self.children
             .iter()
-            .map(|child| child.get_y_size())
+            .map(|child| child.height())
             .max()
             .unwrap_or(0)
     }
@@ -41,7 +41,7 @@ where
         let mut x_offset = 0;
         for child in self.children.iter() {
             child.render(ctx, top_left + Position::new(x_offset, 0));
-            x_offset += child.get_x_size()
+            x_offset += child.width()
         }
     }
 }

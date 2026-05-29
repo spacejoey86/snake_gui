@@ -1,5 +1,5 @@
 use crate::{
-    layout_traits::{FixedWidth, FixedHeight},
+    traits::{FixedWidth, FixedHeight},
 };
 
 pub struct RectangleElement {
@@ -14,13 +14,13 @@ impl RectangleElement {
 }
 
 impl FixedWidth for RectangleElement {
-    fn get_x_size(&self) -> usize {
+    fn width(&self) -> usize {
         self.width
     }
 }
 
 impl FixedHeight for RectangleElement {
-    fn get_y_size(&self) -> usize {
+    fn height(&self) -> usize {
         self.height
     }
 }

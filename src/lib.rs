@@ -1,4 +1,4 @@
-pub mod layout_traits;
+pub mod traits;
 pub mod widgets;
 pub mod containers;
 pub mod position;

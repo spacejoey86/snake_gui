@@ -4,11 +4,11 @@ pub trait UnsizedElement {}
 
 /// a ui element that can calculate it's X size independently of parents
 pub trait FixedWidth {
-    fn get_x_size(&self) -> usize;
+    fn width(&self) -> usize;
 }
 /// a ui element that can calculate it's Y size independently of parents
 pub trait FixedHeight {
-    fn get_y_size(&self) -> usize;
+    fn height(&self) -> usize;
 }
 
 /// like egui Widget trait

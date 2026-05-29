@@ -1,5 +1,5 @@
 use crate::{
-    layout_traits::{FixedHeight, FixedWidth, Render},
+    traits::{FixedHeight, FixedWidth, Render},
     widgets::{label::Label, rectangle::RectangleElement},
 };
 
@@ -66,25 +66,25 @@ impl Render<PrintBackendCTX> for CharRectangle {
 }
 
 impl FixedWidth for CharRectangle {
-    fn get_x_size(&self) -> usize {
+    fn width(&self) -> usize {
         self.width
     }
 }
 
 impl FixedHeight for CharRectangle {
-    fn get_y_size(&self) -> usize {
+    fn height(&self) -> usize {
         self.height
     }
 }
 
 impl FixedHeight for Label {
-    fn get_y_size(&self) -> usize {
+    fn height(&self) -> usize {
         1
     }
 }
 
 impl FixedWidth for Label {
-    fn get_x_size(&self) -> usize {
+    fn width(&self) -> usize {
         self.text.len()
     }
 }
