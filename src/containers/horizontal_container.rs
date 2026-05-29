@@ -11,7 +11,7 @@ pub struct HorizontalContainer<T: ?Sized> {
     children: Vec<Box<T>>,
 }
 
-impl<T> FixedWidth for HorizontalContainer<T>
+impl<T: ?Sized> FixedWidth for HorizontalContainer<T>
 where
     T: FixedWidth,
 {
@@ -20,7 +20,7 @@ where
     }
 }
 
-impl<T> FixedHeight for HorizontalContainer<T>
+impl<T: ?Sized> FixedHeight for HorizontalContainer<T>
 where
     T: FixedHeight,
 {
