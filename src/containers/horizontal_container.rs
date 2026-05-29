@@ -17,7 +17,12 @@ where
     T: FixedWidth,
 {
     fn width(&self) -> usize {
-        self.spacing * self.children.len()
+        let spacing = if self.children.len() == 1 {
+            0
+        } else {
+            self.spacing * self.children.len()
+        };
+        spacing
             + self
                 .children
                 .iter()
