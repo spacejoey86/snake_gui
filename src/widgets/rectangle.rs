@@ -1,6 +1,4 @@
-use crate::{
-    traits::{FixedWidth, FixedHeight},
-};
+use crate::traits::{FixedHeight, FixedWidth};
 
 pub struct RectangleElement {
     pub width: usize,
@@ -8,8 +6,8 @@ pub struct RectangleElement {
 }
 
 impl RectangleElement {
-    pub fn new(width: usize, height: usize) -> Self {
-        Self { width, height }
+    pub fn new(width: usize, height: usize) -> Box<Self> {
+        Box::new(Self { width, height })
     }
 }
 

@@ -46,12 +46,12 @@ pub struct CharRectangle {
 }
 
 impl CharRectangle {
-    pub fn new(width: usize, height: usize, char: char) -> Self {
-        Self {
+    pub fn new(width: usize, height: usize, char: char) -> Box<Self> {
+        Box::new(Self {
             width,
             height,
             char,
-        }
+        })
     }
 }
 

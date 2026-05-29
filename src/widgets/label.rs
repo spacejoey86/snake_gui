@@ -3,9 +3,9 @@ pub struct Label {
 }
 
 impl Label {
-    pub fn new(text: &str) -> Self {
-        Self {
+    pub fn new(text: &str) -> Box<Self> {
+        Box::new(Self {
             text: text.to_string(),
-        }
+        })
     }
 }

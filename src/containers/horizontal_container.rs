@@ -1,6 +1,6 @@
 use crate::{
-    traits::{FixedWidth, FixedHeight, Render},
     position::Position,
+    traits::{FixedHeight, FixedWidth, Render},
 };
 
 /// put elements one after the other horizontally
@@ -52,7 +52,7 @@ impl<T: ?Sized> HorizontalContainer<T> {
         return self;
     }
 
-    pub fn new() -> Self {
-        Self { children: vec![] }
+    pub fn new() -> Box<Self> {
+        Box::new(Self { children: vec![] })
     }
 }

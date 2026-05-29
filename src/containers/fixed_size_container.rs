@@ -1,4 +1,4 @@
-use crate::traits::{FixedWidth, FixedHeight, Render};
+use crate::traits::{FixedHeight, FixedWidth, Render};
 
 /// container that enforces the child fits within a fixed size
 pub struct FixedSizeContainer<T: ?Sized> {
@@ -23,15 +23,15 @@ impl<T: ?Sized> FixedSizeContainer<T>
 where
     T: FixedWidth + FixedHeight,
 {
-    pub fn new(width: usize, height: usize, child: Box<T>) -> Result<Self, ()> {
+    pub fn new(width: usize, height: usize, child: Box<T>) -> Result<Box<Self>, ()> {
         if width < child.width() || height < child.height() {
             Err(())
         } else {
-            Ok(Self {
+            Ok(Box::new(Self {
                 width,
                 height,
                 child,
-            })
+            }))
         }
     }
 }
