@@ -3,6 +3,7 @@ use crate::position::Position;
 pub trait UnsizedElement {}
 
 /// a ui element that can calculate it's X size independently of parents
+/// will need to be generic over the backend so that backends can implement it on foreign types?
 pub trait FixedWidth {
     fn width(&self) -> usize;
 }
