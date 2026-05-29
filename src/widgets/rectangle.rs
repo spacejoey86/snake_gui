@@ -1,4 +1,6 @@
-use crate::layout_traits::{KnownXSizeElement, KnownYSizeElement};
+use crate::{
+    layout_traits::{KnownXSizeElement, KnownYSizeElement},
+};
 
 pub struct RectangleElement {
     pub width: usize,
