@@ -19,3 +19,72 @@ pub trait FixedHeight {
 pub trait Render<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position);
 }
+
+pub trait GrowingWidth {
+    fn min_width(&self) -> usize;
+}
+
+impl<T> GrowingWidth for T
+where
+    T: FixedWidth,
+{
+    fn min_width(&self) -> usize {
+        self.width()
+    }
+}
+
+pub trait GrowingHeight {
+    fn min_height(&self) -> usize;
+}
+
+impl<T> GrowingHeight for T
+where
+    T: FixedHeight,
+{
+    fn min_height(&self) -> usize {
+        self.height()
+    }
+}
+
+pub trait RenderGrowWidth<BackendContext> {
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, width: usize);
+}
+
+impl<T, BackendContext> RenderGrowWidth<BackendContext> for T
+where
+    T: FixedWidth + Render<BackendContext>,
+{
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, width: usize) {
+        assert!(width >= self.width(), "min width not respected");
+        self.render(ctx, top_left);
+    }
+}
+
+pub trait RenderGrowHeight<BackendContext> {
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, height: usize);
+}
+
+impl<T, BackendContext> RenderGrowHeight<BackendContext> for T
+where
+    T: FixedHeight + Render<BackendContext>,
+{
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, height: usize) {
+        assert!(height >= self.height(), "min height not respected");
+        self.render(ctx, top_left);
+    }
+}
+
+pub trait RenderGrowBoth<BackendContext> {
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, size: Position);
+}
+
+impl<T, BackendContext> RenderGrowBoth<BackendContext> for T
+where
+    T: FixedWidth + FixedHeight + Render<BackendContext>,
+{
+    fn render(&self, ctx: &mut BackendContext, top_left: Position, size: Position) {
+        assert!(size.x >= self.width(), "min width not respected");
+        assert!(size.y >= self.height(), "min height not respected");
+        self.render(ctx, top_left);
+    }
+}

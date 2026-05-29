@@ -1,6 +1,6 @@
 use crate::{
     position::Position,
-    traits::{FixedHeight, FixedWidth, Render},
+    traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
 };
 
 /// put elements one after the other horizontally
@@ -22,12 +22,12 @@ where
 
 impl<T: ?Sized> FixedHeight for HorizontalContainer<T>
 where
-    T: FixedHeight,
+    T: GrowingHeight,
 {
     fn height(&self) -> usize {
         self.children
             .iter()
-            .map(|child| child.height())
+            .map(|child| child.min_height())
             .max()
             .unwrap_or(0)
     }
@@ -35,12 +35,13 @@ where
 
 impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalContainer<T>
 where
-    T: FixedWidth + Render<BackendContext>,
+    T: FixedWidth + RenderGrowHeight<BackendContext> + GrowingHeight,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
         let mut x_offset = 0;
+        let height = self.height();
         for child in self.children.iter() {
-            child.render(ctx, top_left + Position::new(x_offset, 0));
+            child.render(ctx, top_left + Position::new(x_offset, 0), height);
             x_offset += child.width()
         }
     }

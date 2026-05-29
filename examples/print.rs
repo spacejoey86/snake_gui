@@ -8,24 +8,28 @@ use angui::{
         padding_container::PaddingContainer,
     },
     position::Position,
-    traits::{FixedHeight, FixedWidth, Render},
-    widgets::{label::Label, rectangle::RectangleElement},
+    traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
+    widgets::{label::Label, separator::VerticalSeparator},
 };
+use assert_impl_trait::assert_impl;
 
-trait SizedPrint: Render<PrintBackendCTX> + FixedWidth + FixedHeight {}
-impl<T> SizedPrint for T where T: Render<PrintBackendCTX> + FixedWidth + FixedHeight {}
+trait SizedPrint: RenderGrowHeight<PrintBackendCTX> + FixedWidth + GrowingHeight {}
+impl<T> SizedPrint for T where T: RenderGrowHeight<PrintBackendCTX> + FixedWidth + GrowingHeight {}
 
 fn main() {
-    let root = BorderContainer::new(Box::new(
+    let root = Box::leak(BorderContainer::new(Box::new(
         HorizontalContainer::new()
             .add_child(CharRectangle::new(30, 10, 'a') as Box<dyn SizedPrint>)
+            .add_child(VerticalSeparator::new())
             .add_child(PaddingContainer::all(Label::new("Test label"), 1))
             .add_child(CharRectangle::new(5, 15, 'b'))
-            .add_child(RectangleElement::new(2, 2)),
-    ));
+            .add_child(CharRectangle::new(3, 3, 'c'))
+    )));
 
-    let mut ctx = backends::print_backend::PrintBackendCTX::new(root.width(), root.height());
-
-    root.render(&mut ctx, Position::new(0, 0)); // render onto buffer
+    let mut ctx = backends::print_backend::PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
+    Render::render(root, &mut ctx, Position::new(0, 0)); // render onto buffer
     ctx.display(); // print the buffer to the terminal
 }
+
+assert_impl!(HorizontalContainer<dyn SizedPrint>: Render<PrintBackendCTX>);
+assert_impl!(BorderContainer<HorizontalContainer<dyn SizedPrint>>: Render<PrintBackendCTX>);
