@@ -8,9 +8,10 @@ use angui::{
         horizontal_wrapping_container::HorizontalWrappingContainer,
         padding_container::PaddingContainer,
     },
+    spacers::spacer::HorizontalSpacer,
     traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
     visual_containers::border_container::BorderContainer,
-    widgets::{label::Label, separator::VerticalSeparator, spacer::HorizontalSpacer},
+    widgets::{label::Label, separator::VerticalSeparator},
 };
 
 trait SizedPrint: RenderGrowHeight<PrintBackendCTX> + FixedWidth + GrowingHeight {}

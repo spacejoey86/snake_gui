@@ -30,9 +30,11 @@ UI element is also not a type, but just a name for any type that implements the 
 
 The pure_containers module provides containers that don't do any rendering.
 They layout children in some way.
-Pure containers are independent of backends.
+Pure containers are backend independent.
 Layout being done by containers instead of a core layout engine manages complexity - adding a new layout does not increase the complexity of the core library.
 Note that you can implement pure containers in your own library - but consider contributing them here.
+
+The spacers module provides spacer widgets. Unlike most other widgets, these do no rendering and therefore are backend independent.
 
 widgets and visual_containers modules provide partial implementations of various UI elements that require backend specific implementations.
 Backends should implement the backend specific parts of as many of these as possible.
