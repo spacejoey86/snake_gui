@@ -1,5 +1,5 @@
 use crate::{
-    backends::print_backend::PrintBackendCTX, containers::border_container::BorderContainer, position::Position, traits::{FixedHeight, FixedWidth, Render}
+    backends::print_backend::PrintBackendCTX, visual_containers::border_container::BorderContainer, position::Position, traits::{FixedHeight, FixedWidth, Render}
 };
 
 impl<T> FixedHeight for BorderContainer<T>

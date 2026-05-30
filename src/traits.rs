@@ -1,5 +1,5 @@
 //! Traits that define UI elements
-//! Elements should implement one each of Width, Height and Render traits
+//! Elements must implement one each of Width, Height and Render traits
 //! Blanket implementations are provided for fixed size UI elements to implement the Growable traits
 
 use crate::position::Position;

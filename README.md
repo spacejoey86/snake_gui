@@ -7,7 +7,7 @@ Aims
 Current features
 - Terminal backend
 - Text widget
-- common layout containers
+- containers, providing common layouts
 
 What's next?
 - opengl backend
@@ -25,12 +25,18 @@ What's next?
 The core of the library is traits.rs, which provides traits to define UI elements
 position.rs defines a position struct
 
-the layout_containers module provides containers that don't do any rendering.
-these are independent of backends.
-Note that you can implement layout containers in your own library - but consider contributing them here.
+Container and widget are not types - they are just names used in documentation.
+UI element is also not a type, but just a name for any type that implements the appropriate traits (see traits.rs)
 
-widgets and (NAME NEEDED)_containers modules provide partial implementations of various UI elements
+The pure_containers module provides containers that don't do any rendering.
+They layout children in some way.
+Pure containers are independent of backends.
+Layout being done by containers instead of a core layout engine manages complexity - adding a new layout does not increase the complexity of the core library.
+Note that you can implement pure containers in your own library - but consider contributing them here.
+
+widgets and visual_containers modules provide partial implementations of various UI elements that require backend specific implementations.
 Backends should implement the backend specific parts of as many of these as possible.
-This means that users can swap backends without needing to change which widgets they use
+This design means that users can swap backends without needing to change which widgets they use.
 
+a backend primarily provides a BackendContext, and implementations for widgets and visual_containers
 Backends can also provide backend specific UI elements (both widgets and containers)
