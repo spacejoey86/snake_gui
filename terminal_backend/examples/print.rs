@@ -1,7 +1,7 @@
 use terminal_backend::{CharRectangle, PrintBackendCTX};
 
 use angui::{
-    position::Position,
+    Position,
     pure_containers::{HorizontalContainer, PaddingContainer},
     spacers::HorizontalSpacer,
     visual_containers::BorderContainer,

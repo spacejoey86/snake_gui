@@ -1,5 +1,5 @@
 use angui::{
-    position::Position,
+    Position,
     widgets::VerticalSeparator,
     {FixedWidth, RenderGrowHeight},
 };

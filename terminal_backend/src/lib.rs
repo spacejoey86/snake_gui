@@ -1,6 +1,5 @@
 use angui::{
-    FixedHeight, FixedWidth, GrowingHeight, Render,
-    position::Position,
+    FixedHeight, FixedWidth, GrowingHeight, Position, Render,
     widgets::{Label, RectangleElement, VerticalSeparator},
 };
 

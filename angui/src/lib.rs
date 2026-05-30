@@ -1,7 +1,8 @@
 mod traits;
 pub use traits::*;
 
-pub mod position;
+mod position;
+pub use position::Position;
 
 pub mod pure_containers;
 pub mod spacers;

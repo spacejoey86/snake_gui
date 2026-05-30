@@ -1,5 +1,5 @@
 use crate::PrintBackendCTX;
-use angui::{FixedHeight, FixedWidth, Render, position::Position};
+use angui::{FixedHeight, FixedWidth, Position, Render};
 
 pub struct CharRectangle {
     width: usize,
