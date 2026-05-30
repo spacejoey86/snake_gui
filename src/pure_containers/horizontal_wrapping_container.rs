@@ -1,5 +1,6 @@
 use crate::{
     position::Position,
+    pure_containers::horizontal_container::ContainerElement,
     traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
 };
 
@@ -10,9 +11,8 @@ pub struct HorizontalWrappingContainer<T: ?Sized> {
     wrap_width: usize,
 }
 
-impl<T: ?Sized> FixedWidth for HorizontalWrappingContainer<T>
-where
-    T: FixedWidth,
+impl<BackendContext> FixedWidth
+    for HorizontalWrappingContainer<dyn ContainerElement<BackendContext>>
 {
     fn width(&self) -> usize {
         self.children
@@ -58,8 +58,11 @@ impl<T: ?Sized> HorizontalWrappingContainer<T> {
     }
 }
 
-impl<T: ?Sized + FixedWidth> HorizontalWrappingContainer<T> {
-    pub fn add_child(mut self, child: Box<T>) -> Result<Self, ()> {
+impl<BackendContext> HorizontalWrappingContainer<dyn ContainerElement<BackendContext>> {
+    pub fn add_child(
+        mut self,
+        child: Box<dyn ContainerElement<BackendContext>>,
+    ) -> Result<Box<Self>, ()> {
         if child.width() > self.wrap_width {
             return Err(());
         }
@@ -67,15 +70,15 @@ impl<T: ?Sized + FixedWidth> HorizontalWrappingContainer<T> {
         let last_row = self.children.last().unwrap();
         let last_row_width = self.row_width(last_row);
         if last_row_width + child.width() + last_row_width.min(1) > self.wrap_width {
-            // create a new row
+            // would overflow: create a new row
             self.children.push(vec![])
         }
         self.children.last_mut().unwrap().push(child);
 
-        return Ok(self);
+        return Ok(Box::new(self));
     }
 
-    fn row_width(&self, row: &Vec<Box<T>>) -> usize {
+    fn row_width(&self, row: &Vec<Box<dyn ContainerElement<BackendContext>>>) -> usize {
         let spacing = if row.len() == 0 {
             0
         } else {

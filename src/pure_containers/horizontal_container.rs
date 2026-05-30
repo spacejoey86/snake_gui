@@ -62,8 +62,8 @@ where
 pub trait ContainerElement<BackendContext>: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
 impl<T, BackendContext> ContainerElement<BackendContext> for T where T: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
 
-impl<T> HorizontalContainer<dyn ContainerElement<T>> {
-    pub fn add_child(mut self, child: Box<dyn ContainerElement<T>>) -> Box<Self> {
+impl<BackendContext> HorizontalContainer<dyn ContainerElement<BackendContext>> {
+    pub fn add_child(mut self, child: Box<dyn ContainerElement<BackendContext>>) -> Box<Self> {
         self.children.push(child);
         return Box::new(self);
     }
