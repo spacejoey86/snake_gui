@@ -3,6 +3,7 @@ use crate::{
     traits::{FixedHeight, FixedWidth, Render},
 };
 
+/// Adds padding around an element
 pub struct PaddingContainer<T> {
     left: usize,
     right: usize,
@@ -40,6 +41,7 @@ where
 }
 
 impl<T> PaddingContainer<T> {
+    /// Create a padding container, specifying the padding for each side
     pub fn new(child: Box<T>, left: usize, right: usize, top: usize, bottom: usize) -> Box<Self> {
         Box::new(Self {
             left,
@@ -50,6 +52,7 @@ impl<T> PaddingContainer<T> {
         })
     }
 
+    /// Create a padding container with the same padding on each side
     pub fn all(child: Box<T>, padding: usize) -> Box<Self> {
         Box::new(Self {
             left: padding,

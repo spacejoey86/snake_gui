@@ -1,5 +1,6 @@
 use crate::traits::GrowingHeight;
 
+/// Vertical separator bar to provide visual division of elements
 pub struct VerticalSeparator {}
 
 impl GrowingHeight for VerticalSeparator {

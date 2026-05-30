@@ -4,6 +4,11 @@ use crate::{
     traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
 };
 
+/// Place elements next to each other in rows.
+/// If the next element wouldn't fit within wrap_width, place it on a new row.
+/// Adds h_spacing between elements, and v_spacing between rows.
+/// Allows element's height to grow to match the talles element in their row.
+/// Width of this container is the width of the widest row - this might be smaller than wrap_width
 pub struct HorizontalWrappingContainer<T: ?Sized> {
     children: Vec<Vec<Box<T>>>,
     h_spacing: usize,

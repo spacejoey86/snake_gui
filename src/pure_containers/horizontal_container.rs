@@ -3,10 +3,9 @@ use crate::{
     traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
 };
 
-/// put elements one after the other horizontally
-/// elements must have a known size
-/// if your elements don't have a known size, consider using (TODO)
-/// probably needs to box the elements? or can I use references somehow
+/// Place elements one after the other horizontally.
+/// Adds spacing between elements.
+/// Allows element's height to grow to match the tallest element.
 pub struct HorizontalContainer<T: ?Sized> {
     children: Vec<Box<T>>,
     spacing: usize,

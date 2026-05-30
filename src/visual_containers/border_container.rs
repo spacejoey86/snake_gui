@@ -1,3 +1,4 @@
+/// Container that draws a border around a child
 pub struct BorderContainer<T> {
     pub child: Box<T>,
 }

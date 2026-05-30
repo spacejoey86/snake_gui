@@ -1,3 +1,4 @@
+/// Single line text element
 pub struct Label {
     pub text: String,
 }

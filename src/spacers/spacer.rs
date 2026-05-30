@@ -3,6 +3,8 @@ use crate::{
     traits::{FixedHeight, FixedWidth, Render},
 };
 
+/// Spacer that takes up a specified vertical space.
+/// Does not take up any space horizontally.
 pub struct VerticalSpacer {
     height: usize,
 }
@@ -29,6 +31,8 @@ impl<T> Render<T> for VerticalSpacer {
     fn render(&self, _ctx: &mut T, _top_left: Position) {}
 }
 
+/// Spacer that takes up a specified horizontal space.
+/// Does not take up any space vertically.
 pub struct HorizontalSpacer {
     width: usize,
 }

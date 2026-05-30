@@ -23,6 +23,7 @@ impl<T: ?Sized> FixedSizeContainer<T>
 where
     T: FixedWidth + FixedHeight,
 {
+    /// Returns an error if the child doesn't fit within the specified size
     pub fn new(width: usize, height: usize, child: Box<T>) -> Result<Box<Self>, ()> {
         if width < child.width() || height < child.height() {
             Err(())
