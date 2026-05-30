@@ -1,25 +1,25 @@
+//! Traits that define UI elements
+//! Elements should implement one each of Width, Height and Render traits
+//! Blanket implementations are provided for fixed size UI elements to implement the Growable traits
+
 use crate::position::Position;
 
-/// a ui element that can calculate it's X size independently of parents
-/// will need to be generic over the backend so that backends can implement it on foreign types?
-pub trait FixedWidth {
+/// UI element with a width that doesn't grow
+pub trait FixedWidth { // will need to be generic over the backend so that backends can implement it on foreign types?
     fn width(&self) -> usize;
 }
-/// a ui element that can calculate it's Y size independently of parents
+/// UI element with a height that doesn't grow
 pub trait FixedHeight {
     fn height(&self) -> usize;
 }
 
-/// like egui Widget trait
-/// given sizes (?) render yourself?
-/// for a GUI on a screen, the top level has a size
-/// but some things might not - windows which can resize, document of arbitrary size
-/// does this actually render, or just layout
-/// depends on your backend?
+/// Render this fixed size UI element
+/// Some backends might require an additional call before you see the element on your screen
 pub trait Render<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position);
 }
 
+// since UI elements are passed around boxed, implement render for a boxed element
 impl<T, BackendContext> Render<BackendContext> for Box<T>
 where
     T: ?Sized + Render<BackendContext>,
@@ -29,10 +29,13 @@ where
     }
 }
 
+/// UI element with a width that can grow
 pub trait GrowingWidth {
     fn min_width(&self) -> usize;
 }
 
+// You can use a fixed width UI element as a growable width element
+// This doesn't cause the element's width to grow
 impl<T> GrowingWidth for T
 where
     T: FixedWidth,
@@ -42,10 +45,13 @@ where
     }
 }
 
+/// UI element with a height that can grow
 pub trait GrowingHeight {
     fn min_height(&self) -> usize;
 }
 
+// You can use a fixed height UI element as a growable height element
+// This doesn't cause the element's height to grow
 impl<T> GrowingHeight for T
 where
     T: FixedHeight,
@@ -55,13 +61,15 @@ where
     }
 }
 
+/// Render a UI element with fixed height, growable width
 pub trait RenderGrowWidth<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, width: usize);
 }
 
+// You can use a fixed width UI element as a growable width element
 impl<T, BackendContext> RenderGrowWidth<BackendContext> for T
 where
-    T: FixedWidth + Render<BackendContext>,
+    T: FixedWidth + Render<BackendContext>, // fixed width bound is just used to do an additional check
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, width: usize) {
         assert!(width >= self.width(), "min width not respected");
@@ -69,13 +77,15 @@ where
     }
 }
 
+/// Render a UI element with a fixed width, growable height
 pub trait RenderGrowHeight<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, height: usize);
 }
 
+// You can use a fixed height UI element as a growable height element
 impl<T, BackendContext> RenderGrowHeight<BackendContext> for T
 where
-    T: FixedHeight + Render<BackendContext>,
+    T: FixedHeight + Render<BackendContext>, // fixed height bound is just used to do an additional check
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, height: usize) {
         assert!(height >= self.height(), "min height not respected");
@@ -83,13 +93,15 @@ where
     }
 }
 
+/// Render a UI element with growable width and height
 pub trait RenderGrowBoth<BackendContext> {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, size: Position);
 }
 
+// You can use a UI element with fixed width and height as an element with growable width and height
 impl<T, BackendContext> RenderGrowBoth<BackendContext> for T
 where
-    T: FixedWidth + FixedHeight + Render<BackendContext>,
+    T: FixedWidth + FixedHeight + Render<BackendContext>, // fixed width and height bounds just used to do additional checks
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position, size: Position) {
         assert!(size.x >= self.width(), "min width not respected");
