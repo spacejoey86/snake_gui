@@ -22,3 +22,5 @@ impl<BackendContext> FixedHeight<BackendContext> for RectangleElement {
         self.height
     }
 }
+
+// Backends should implement Render

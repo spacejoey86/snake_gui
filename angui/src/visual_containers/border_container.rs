@@ -8,3 +8,8 @@ impl<T> BorderContainer<T> {
         Box::new(Self { child })
     }
 }
+
+// Backends should implement for this struct:
+// FixedHeight
+// FixedWidth
+// Render where T: Render + FixedHeight + FixedWidth
