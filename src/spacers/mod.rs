@@ -1,1 +1,2 @@
-pub mod spacer;
+mod spacer;
+pub use spacer::{HorizontalSpacer, VerticalSpacer};

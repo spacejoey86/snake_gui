@@ -1,3 +1,8 @@
-pub mod rectangle;
-pub mod label;
-pub mod separator;
+mod rectangle;
+pub use rectangle::RectangleElement;
+
+mod label;
+pub use label::Label;
+
+mod separator;
+pub use separator::VerticalSeparator;

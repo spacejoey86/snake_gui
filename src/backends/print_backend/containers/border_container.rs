@@ -1,5 +1,8 @@
 use crate::{
-    backends::print_backend::PrintBackendCTX, visual_containers::border_container::BorderContainer, position::Position, traits::{FixedHeight, FixedWidth, Render}
+    backends::print_backend::PrintBackendCTX,
+    position::Position,
+    traits::{FixedHeight, FixedWidth, Render},
+    visual_containers::BorderContainer,
 };
 
 impl<T> FixedHeight for BorderContainer<T>
@@ -21,7 +24,8 @@ where
 }
 
 impl<T> Render<PrintBackendCTX> for BorderContainer<T>
-where T: Render<PrintBackendCTX> + FixedHeight + FixedWidth
+where
+    T: Render<PrintBackendCTX> + FixedHeight + FixedWidth,
 {
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: crate::position::Position) {
         // top and bottom borders
@@ -42,6 +46,6 @@ where T: Render<PrintBackendCTX> + FixedHeight + FixedWidth
         ctx.buffer[0][self.child.width() + 1] = '╮';
         ctx.buffer[self.child.height() + 1][self.child.width() + 1] = '╯';
         // child
-        self.child.render(ctx, top_left + Position::new(1,1));
+        self.child.render(ctx, top_left + Position::new(1, 1));
     }
 }

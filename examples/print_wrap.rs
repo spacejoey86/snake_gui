@@ -1,14 +1,11 @@
 use angui::{
     backends::print_backend::{CharRectangle, PrintBackendCTX},
     position::Position,
-    pure_containers::{
-        horizontal_wrapping_container::HorizontalWrappingContainer,
-        padding_container::PaddingContainer,
-    },
-    spacers::spacer::HorizontalSpacer,
-    traits::{FixedHeight, FixedWidth, Render},
-    visual_containers::border_container::BorderContainer,
-    widgets::{label::Label, separator::VerticalSeparator},
+    pure_containers::{HorizontalWrappingContainer, PaddingContainer},
+    spacers::HorizontalSpacer,
+    visual_containers::BorderContainer,
+    widgets::{Label, VerticalSeparator},
+    {FixedHeight, FixedWidth, Render},
 };
 
 fn main() {

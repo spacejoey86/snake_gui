@@ -1,10 +1,10 @@
 use crate::{
     traits::{FixedHeight, FixedWidth, Render},
-    widgets::{label::Label, rectangle::RectangleElement},
+    widgets::{Label, RectangleElement},
 };
 
-mod widgets;
 mod containers;
+mod widgets;
 pub use widgets::char_rectangle::CharRectangle;
 
 pub struct PrintBackendCTX {
