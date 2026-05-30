@@ -1,9 +1,4 @@
-use angui::{
-    FixedHeight, FixedWidth, GrowingHeight, Position, Render,
-    widgets::{Label, RectangleElement, VerticalSeparator},
-};
-
-mod containers;
+mod visual_containers;
 mod widgets;
 pub use widgets::char_rectangle::CharRectangle;
 
@@ -30,41 +25,5 @@ impl PrintBackendCTX {
                     .fold("".to_string(), |l, r| format!("{}{}", l, r).to_string())
             )
         }
-    }
-}
-
-impl Render<PrintBackendCTX> for RectangleElement {
-    fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
-        for row in 0..self.height {
-            for column in 0..self.width {
-                ctx.buffer[top_left.y + row][top_left.x + column] = '█';
-            }
-        }
-    }
-}
-
-impl FixedHeight<PrintBackendCTX> for Label {
-    fn height(&self) -> usize {
-        1
-    }
-}
-
-impl FixedWidth<PrintBackendCTX> for Label {
-    fn width(&self) -> usize {
-        self.text.len()
-    }
-}
-
-impl Render<PrintBackendCTX> for Label {
-    fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
-        for (i, char) in self.text.chars().enumerate() {
-            ctx.buffer[top_left.y][top_left.x + i] = char
-        }
-    }
-}
-
-impl GrowingHeight<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
-    fn min_height(&self) -> usize {
-        0
     }
 }

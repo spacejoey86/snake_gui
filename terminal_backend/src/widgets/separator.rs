@@ -1,8 +1,4 @@
-use angui::{
-    Position,
-    widgets::VerticalSeparator,
-    {FixedWidth, RenderGrowHeight},
-};
+use angui::{FixedWidth, GrowingHeight, Position, RenderGrowHeight, widgets::VerticalSeparator};
 
 use crate::PrintBackendCTX;
 
@@ -17,5 +13,11 @@ impl RenderGrowHeight<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
         for y in 0..height {
             ctx.buffer[top_left.y + y][top_left.x] = '│';
         }
+    }
+}
+
+impl GrowingHeight<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
+    fn min_height(&self) -> usize {
+        0
     }
 }
