@@ -11,9 +11,9 @@ pub struct HorizontalContainer<T: ?Sized> {
     spacing: usize,
 }
 
-impl<T: ?Sized> FixedWidth for HorizontalContainer<T>
+impl<T: ?Sized, BackendContext> FixedWidth<BackendContext> for HorizontalContainer<T>
 where
-    T: FixedWidth,
+    T: FixedWidth<BackendContext>,
 {
     fn width(&self) -> usize {
         let spacing = if self.children.len() == 1 {
@@ -30,9 +30,9 @@ where
     }
 }
 
-impl<T: ?Sized> FixedHeight for HorizontalContainer<T>
+impl<T: ?Sized, BackendContext> FixedHeight<BackendContext> for HorizontalContainer<T>
 where
-    T: GrowingHeight,
+    T: GrowingHeight<BackendContext>,
 {
     fn height(&self) -> usize {
         self.children
@@ -45,7 +45,9 @@ where
 
 impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalContainer<T>
 where
-    T: FixedWidth + RenderGrowHeight<BackendContext> + GrowingHeight,
+    T: FixedWidth<BackendContext>
+        + RenderGrowHeight<BackendContext>
+        + GrowingHeight<BackendContext>,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
         let mut x_offset = 0;
@@ -58,8 +60,16 @@ where
 }
 
 /// trait to help rust infer types
-pub trait ContainerElement<BackendContext>: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
-impl<T, BackendContext> ContainerElement<BackendContext> for T where T: RenderGrowHeight<BackendContext> + FixedWidth + GrowingHeight {}
+pub trait ContainerElement<BackendContext>:
+    RenderGrowHeight<BackendContext> + FixedWidth<BackendContext> + GrowingHeight<BackendContext>
+{
+}
+impl<T, BackendContext> ContainerElement<BackendContext> for T where
+    T: RenderGrowHeight<BackendContext>
+        + FixedWidth<BackendContext>
+        + GrowingHeight<BackendContext>
+{
+}
 
 impl<BackendContext> HorizontalContainer<dyn ContainerElement<BackendContext>> {
     pub fn add_child(mut self, child: Box<dyn ContainerElement<BackendContext>>) -> Box<Self> {

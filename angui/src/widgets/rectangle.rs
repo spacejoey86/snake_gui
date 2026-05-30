@@ -11,13 +11,13 @@ impl RectangleElement {
     }
 }
 
-impl FixedWidth for RectangleElement {
+impl<BackendContext> FixedWidth<BackendContext> for RectangleElement {
     fn width(&self) -> usize {
         self.width
     }
 }
 
-impl FixedHeight for RectangleElement {
+impl<BackendContext> FixedHeight<BackendContext> for RectangleElement {
     fn height(&self) -> usize {
         self.height
     }

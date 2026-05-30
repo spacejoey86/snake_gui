@@ -15,13 +15,13 @@ impl VerticalSpacer {
     }
 }
 
-impl FixedWidth for VerticalSpacer {
+impl<BackendContext> FixedWidth<BackendContext> for VerticalSpacer {
     fn width(&self) -> usize {
         0
     }
 }
 
-impl FixedHeight for VerticalSpacer {
+impl<BackendContext> FixedHeight<BackendContext> for VerticalSpacer {
     fn height(&self) -> usize {
         self.height
     }
@@ -43,13 +43,13 @@ impl HorizontalSpacer {
     }
 }
 
-impl FixedWidth for HorizontalSpacer {
+impl<BackendContext> FixedWidth<BackendContext> for HorizontalSpacer {
     fn width(&self) -> usize {
         self.width
     }
 }
 
-impl FixedHeight for HorizontalSpacer {
+impl<BackendContext> FixedHeight<BackendContext> for HorizontalSpacer {
     fn height(&self) -> usize {
         0
     }

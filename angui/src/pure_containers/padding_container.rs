@@ -1,36 +1,39 @@
+use std::marker::PhantomData;
+
 use crate::{
     position::Position,
     traits::{FixedHeight, FixedWidth, Render},
 };
 
 /// Adds padding around an element
-pub struct PaddingContainer<T> {
+pub struct PaddingContainer<T, BackendContext> {
     left: usize,
     right: usize,
     top: usize,
     bottom: usize,
     child: Box<T>,
+    phantom: PhantomData<BackendContext>,
 }
 
-impl<T> FixedWidth for PaddingContainer<T>
+impl<T, BackendContext> FixedWidth<BackendContext> for PaddingContainer<T, BackendContext>
 where
-    T: FixedWidth,
+    T: FixedWidth<BackendContext>,
 {
     fn width(&self) -> usize {
         self.left + self.child.width() + self.right
     }
 }
 
-impl<T> FixedHeight for PaddingContainer<T>
+impl<T, BackendContext> FixedHeight<BackendContext> for PaddingContainer<T, BackendContext>
 where
-    T: FixedHeight,
+    T: FixedHeight<BackendContext>,
 {
     fn height(&self) -> usize {
         self.top + self.child.height() + self.bottom
     }
 }
 
-impl<T, BackendContext> Render<BackendContext> for PaddingContainer<T>
+impl<T, BackendContext> Render<BackendContext> for PaddingContainer<T, BackendContext>
 where
     T: Render<BackendContext>,
 {
@@ -40,7 +43,7 @@ where
     }
 }
 
-impl<T> PaddingContainer<T> {
+impl<T, BackendContext> PaddingContainer<T, BackendContext> {
     /// Create a padding container, specifying the padding for each side
     pub fn new(child: Box<T>, left: usize, right: usize, top: usize, bottom: usize) -> Box<Self> {
         Box::new(Self {
@@ -49,6 +52,7 @@ impl<T> PaddingContainer<T> {
             top,
             bottom,
             child,
+            phantom: PhantomData,
         })
     }
 
@@ -60,6 +64,7 @@ impl<T> PaddingContainer<T> {
             top: padding,
             bottom: padding,
             child,
+            phantom: PhantomData,
         })
     }
 }

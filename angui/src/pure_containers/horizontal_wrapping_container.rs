@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::{
     position::Position,
     pure_containers::horizontal_container::ContainerElement,
@@ -9,15 +11,16 @@ use crate::{
 /// Adds h_spacing between elements, and v_spacing between rows.
 /// Allows element's height to grow to match the talles element in their row.
 /// Width of this container is the width of the widest row - this might be smaller than wrap_width
-pub struct HorizontalWrappingContainer<T: ?Sized> {
+pub struct HorizontalWrappingContainer<T: ?Sized, BackendContext> {
     children: Vec<Vec<Box<T>>>,
     h_spacing: usize,
     v_spacing: usize,
     wrap_width: usize,
+    phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext> FixedWidth
-    for HorizontalWrappingContainer<dyn ContainerElement<BackendContext>>
+impl<BackendContext> FixedWidth<BackendContext>
+    for HorizontalWrappingContainer<dyn ContainerElement<BackendContext>, BackendContext>
 {
     fn width(&self) -> usize {
         self.children
@@ -28,9 +31,10 @@ impl<BackendContext> FixedWidth
     }
 }
 
-impl<T: ?Sized> FixedHeight for HorizontalWrappingContainer<T>
+impl<T: ?Sized, BackendContext> FixedHeight<BackendContext>
+    for HorizontalWrappingContainer<T, BackendContext>
 where
-    T: GrowingHeight,
+    T: GrowingHeight<BackendContext>,
 {
     fn height(&self) -> usize {
         let spacing = if self.children.len() == 0 {
@@ -52,18 +56,21 @@ where
     }
 }
 
-impl<T: ?Sized> HorizontalWrappingContainer<T> {
+impl<T: ?Sized, BackendContext> HorizontalWrappingContainer<T, BackendContext> {
     pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Box<Self> {
         Box::new(Self {
             children: vec![vec![]],
             h_spacing,
             v_spacing,
             wrap_width,
+            phantom: PhantomData,
         })
     }
 }
 
-impl<BackendContext> HorizontalWrappingContainer<dyn ContainerElement<BackendContext>> {
+impl<BackendContext>
+    HorizontalWrappingContainer<dyn ContainerElement<BackendContext>, BackendContext>
+{
     pub fn add_child(
         mut self,
         child: Box<dyn ContainerElement<BackendContext>>,
@@ -93,9 +100,9 @@ impl<BackendContext> HorizontalWrappingContainer<dyn ContainerElement<BackendCon
     }
 }
 
-impl<T: ?Sized> HorizontalWrappingContainer<T>
+impl<T: ?Sized, BackendContext> HorizontalWrappingContainer<T, BackendContext>
 where
-    T: GrowingHeight,
+    T: GrowingHeight<BackendContext>,
 {
     fn row_height(row: &Vec<Box<T>>) -> usize {
         row.iter()
@@ -105,9 +112,12 @@ where
     }
 }
 
-impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalWrappingContainer<T>
+impl<T: ?Sized, BackendContext> Render<BackendContext>
+    for HorizontalWrappingContainer<T, BackendContext>
 where
-    T: FixedWidth + GrowingHeight + RenderGrowHeight<BackendContext>,
+    T: FixedWidth<BackendContext>
+        + GrowingHeight<BackendContext>
+        + RenderGrowHeight<BackendContext>,
 {
     fn render(&self, ctx: &mut BackendContext, top_left: crate::position::Position) {
         let mut y_offset = 0;

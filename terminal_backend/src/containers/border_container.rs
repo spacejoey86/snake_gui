@@ -1,22 +1,22 @@
-use crate::{
-    backends::print_backend::PrintBackendCTX,
+use crate::PrintBackendCTX;
+use angui::{
     position::Position,
-    traits::{FixedHeight, FixedWidth, Render},
     visual_containers::BorderContainer,
+    {FixedHeight, FixedWidth, Render},
 };
 
-impl<T> FixedHeight for BorderContainer<T>
+impl<T> FixedHeight<PrintBackendCTX> for BorderContainer<T>
 where
-    T: FixedHeight,
+    T: FixedHeight<PrintBackendCTX>,
 {
     fn height(&self) -> usize {
         self.child.height() + 2
     }
 }
 
-impl<T> FixedWidth for BorderContainer<T>
+impl<T> FixedWidth<PrintBackendCTX> for BorderContainer<T>
 where
-    T: FixedWidth,
+    T: FixedWidth<PrintBackendCTX>,
 {
     fn width(&self) -> usize {
         self.child.width() + 2
@@ -25,9 +25,9 @@ where
 
 impl<T> Render<PrintBackendCTX> for BorderContainer<T>
 where
-    T: Render<PrintBackendCTX> + FixedHeight + FixedWidth,
+    T: Render<PrintBackendCTX> + FixedHeight<PrintBackendCTX> + FixedWidth<PrintBackendCTX>,
 {
-    fn render(&self, ctx: &mut PrintBackendCTX, top_left: crate::position::Position) {
+    fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
         // top and bottom borders
         for x in 0..(self.child.width()) {
             let x_absolute = top_left.x + x + 1;
