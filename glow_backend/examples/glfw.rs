@@ -41,7 +41,6 @@ fn main() {
                 }
                 glfw::WindowEvent::FramebufferSize(width, height) => {
                     ctx.set_window_size(width as u32, height as u32);
-                    println!("size changed");
                 }
                 _ => {}
             }
