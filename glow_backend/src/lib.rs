@@ -67,7 +67,7 @@ impl GlowBackendContext {
             gl.enable_vertex_attrib_array(0);
             gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 0, 0);
             // upload the vertices to the gpu
-            let vertices: [f32; _] = [-1.0, 1.0, 0.5, 1.0, -1.0, 0.3, 0.5, 0.3];
+            let vertices: [f32; _] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
             let vertices_u8 = core::slice::from_raw_parts(
                 vertices.as_ptr() as *const u8,
                 vertices.len() * core::mem::size_of::<f32>(),
@@ -77,8 +77,11 @@ impl GlowBackendContext {
             // instance offset buffer
             let instance_offset_buffer = gl.create_buffer().unwrap();
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_offset_buffer));
-            let instance_offsets: [f32; _] = [0.0, 0.0, 0.6, 0.6];
-            let instance_offsets_u8 = core::slice::from_raw_parts(instance_offsets.as_ptr() as *const u8, instance_offsets.len() * core::mem::size_of::<f32>());
+            let instance_offsets: [f32; _] = [0.0, 0.0, -0.6, -0.6];
+            let instance_offsets_u8 = core::slice::from_raw_parts(
+                instance_offsets.as_ptr() as *const u8,
+                instance_offsets.len() * core::mem::size_of::<f32>(),
+            );
             gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, instance_offsets_u8, glow::STATIC_DRAW);
             gl.enable_vertex_attrib_array(1);
             gl.vertex_attrib_pointer_f32(1, 2, glow::FLOAT, false, 0, 0); // should the stride be set?
@@ -93,6 +96,12 @@ impl GlowBackendContext {
     pub fn render(&self) {
         unsafe {
             self.gl.draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, 2);
+        }
+    }
+
+    pub fn set_window_size(&self, width: i32, height: i32) {
+        unsafe {
+            self.gl.viewport(0, 0, width, height);
         }
     }
 }

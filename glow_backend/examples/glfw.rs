@@ -16,6 +16,7 @@ fn main() {
         })
     };
     let backend_context = GlowBackendContext::new(glow_context);
+    backend_context.set_window_size(window.get_size().0, window.get_size().1);
 
     // Run the app:
     while !window.should_close() {
