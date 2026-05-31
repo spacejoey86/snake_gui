@@ -28,7 +28,7 @@ out vec3 fColor;
 
 void main()
 {
-    gl_Position = vec4(vertexPos * instanceSize + instanceOffset, 0.0, 1.0);
+    gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
     fColor = vec3(1.0, 0.0, 1.0);
 }
 ";
