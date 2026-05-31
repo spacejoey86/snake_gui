@@ -9,12 +9,13 @@ pub struct GlowBackendContext {
 const VERTEX_SHADER_SOURCE: &str = "
 #version 330 core
 layout (location = 0) in vec2 vertexPos;
+layout (location = 1) in vec2 instanceOffset;
 
 out vec3 fColor;
 
 void main()
 {
-    gl_Position = vec4(vertexPos, 0.0, 1.0);
+    gl_Position = vec4(vertexPos + instanceOffset, 0.0, 1.0);
     fColor = vec3(1.0, 0.0, 1.0);
 }
 ";
@@ -55,7 +56,8 @@ impl GlowBackendContext {
             }
             gl.use_program(Some(shader_program));
 
-            // create buffers?
+            // create buffers
+
             // vertices of my rectangle
             let vertex_array = gl.create_vertex_array().unwrap(); // this is the state, stores which vertex buffer is used
             gl.bind_vertex_array(Some(vertex_array)); // do I need to bind once here, and/or every render call?
@@ -64,7 +66,7 @@ impl GlowBackendContext {
             // the vertices are an attribute passed to the vertex shader:
             gl.enable_vertex_attrib_array(0);
             gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 0, 0);
-
+            // upload the vertices to the gpu
             let vertices: [f32; _] = [-1.0, 1.0, 0.5, 1.0, -1.0, 0.3, 0.5, 0.3];
             let vertices_u8 = core::slice::from_raw_parts(
                 vertices.as_ptr() as *const u8,
@@ -72,9 +74,15 @@ impl GlowBackendContext {
             );
             gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, vertices_u8, glow::STATIC_DRAW);
 
-            // some settings
-            gl.disable(glow::FRAMEBUFFER_SRGB);
-            gl.disable(glow::BLEND);
+            // instance offset buffer
+            let instance_offset_buffer = gl.create_buffer().unwrap();
+            gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_offset_buffer));
+            let instance_offsets: [f32; _] = [0.0, 0.0, 0.6, 0.6];
+            let instance_offsets_u8 = core::slice::from_raw_parts(instance_offsets.as_ptr() as *const u8, instance_offsets.len() * core::mem::size_of::<f32>());
+            gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, instance_offsets_u8, glow::STATIC_DRAW);
+            gl.enable_vertex_attrib_array(1);
+            gl.vertex_attrib_pointer_f32(1, 2, glow::FLOAT, false, 0, 0); // should the stride be set?
+            gl.vertex_attrib_divisor(1, 1);
 
             // todo: font texture
 
@@ -84,7 +92,7 @@ impl GlowBackendContext {
 
     pub fn render(&self) {
         unsafe {
-            self.gl.draw_arrays(glow::TRIANGLE_STRIP, 0, 4);
+            self.gl.draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, 2);
         }
     }
 }
