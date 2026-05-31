@@ -1,9 +1,18 @@
 mod widgets;
 
-use glow::{Context, HasContext};
+use glow::{Context, HasContext, NativeBuffer};
 
 pub struct GlowBackendContext {
     gl: Context,
+    instance_offset_buffer: NativeBuffer,
+    rects: Vec<Rect>,
+}
+
+struct Rect {
+    offset_x: f32,
+    offset_y: f32,
+    // width: f32,
+    // height: f32,
 }
 
 const VERTEX_SHADER_SOURCE: &str = "
@@ -77,25 +86,46 @@ impl GlowBackendContext {
             // instance offset buffer
             let instance_offset_buffer = gl.create_buffer().unwrap();
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_offset_buffer));
-            let instance_offsets: [f32; _] = [0.0, 0.0, -0.6, -0.6];
-            let instance_offsets_u8 = core::slice::from_raw_parts(
-                instance_offsets.as_ptr() as *const u8,
-                instance_offsets.len() * core::mem::size_of::<f32>(),
-            );
-            gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, instance_offsets_u8, glow::STATIC_DRAW);
             gl.enable_vertex_attrib_array(1);
             gl.vertex_attrib_pointer_f32(1, 2, glow::FLOAT, false, 0, 0); // should the stride be set?
             gl.vertex_attrib_divisor(1, 1);
 
             // todo: font texture
 
-            Self { gl }
+            Self {
+                gl,
+                instance_offset_buffer,
+                rects: vec![
+                    Rect {
+                        offset_x: 0.0,
+                        offset_y: 0.0,
+                    },
+                    Rect {
+                        offset_x: -0.5,
+                        offset_y: -0.5,
+                    },
+                    Rect {
+                        offset_x: -1.2,
+                        offset_y: 0.0,
+                    }
+                ],
+            }
         }
     }
 
-    pub fn render(&self) {
+    pub fn display(&self) {
         unsafe {
-            self.gl.draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, 2);
+            // upload instance attributes
+            self.gl.bind_buffer(glow::ARRAY_BUFFER, Some(self.instance_offset_buffer));
+            let instance_offsets: Vec<f32> = self.rects.iter().flat_map(|rect| [rect.offset_x, rect.offset_y]).collect();
+            let instance_offsets_u8 = core::slice::from_raw_parts(
+                instance_offsets.as_ptr() as *const u8,
+                instance_offsets.len() * core::mem::size_of::<f32>(),
+            );
+            self.gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, instance_offsets_u8, glow::STATIC_DRAW);
+
+            // draw
+            self.gl.draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, self.rects.len() as i32);
         }
     }
 

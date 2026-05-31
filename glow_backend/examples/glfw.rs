@@ -20,7 +20,7 @@ fn main() {
 
     // Run the app:
     while !window.should_close() {
-        backend_context.render();
+        backend_context.display();
 
         window.swap_buffers();
 
