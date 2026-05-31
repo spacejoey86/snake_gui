@@ -6,9 +6,18 @@ pub struct GlowBackendContext {
     gl: Context,
     instance_offset_buffer: NativeBuffer,
     instance_size_buffer: NativeBuffer,
+    instance_colour_buffer: NativeBuffer,
     rects: Vec<Rect>,
     window_width: u32,
     window_height: u32,
+    colour_pallete: [Colour; 256],
+}
+
+#[derive(Copy, Clone)]
+pub struct Colour {
+    r: f32,
+    g: f32,
+    b: f32,
 }
 
 struct Rect {
@@ -16,6 +25,7 @@ struct Rect {
     offset_y: f32,
     width: f32,
     height: f32,
+    colour_index: u8,
 }
 
 const VERTEX_SHADER_SOURCE: &str = "
@@ -23,13 +33,14 @@ const VERTEX_SHADER_SOURCE: &str = "
 layout (location = 0) in vec2 vertexPos;
 layout (location = 1) in vec2 instanceOffset;
 layout (location = 2) in vec2 instanceSize;
+layout (location = 3) in vec3 instanceColour;
 
 out vec3 fColor;
 
 void main()
 {
     gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
-    fColor = vec3(1.0, 0.0, 1.0);
+    fColor = instanceColour;
 }
 ";
 
@@ -99,6 +110,12 @@ impl GlowBackendContext {
             gl.enable_vertex_attrib_array(2);
             gl.vertex_attrib_pointer_f32(2, 2, glow::FLOAT, false, 0, 0);
             gl.vertex_attrib_divisor(2, 1);
+            // instance colour buffer
+            let instance_colour_buffer = gl.create_buffer().unwrap();
+            gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_colour_buffer));
+            gl.enable_vertex_attrib_array(3);
+            gl.vertex_attrib_pointer_f32(3, 3, glow::FLOAT, false, 0, 0);
+            gl.vertex_attrib_divisor(3, 1);
 
             // todo: font texture
 
@@ -109,9 +126,11 @@ impl GlowBackendContext {
                 gl,
                 instance_offset_buffer,
                 instance_size_buffer,
+                instance_colour_buffer,
                 rects: vec![],
                 window_height,
                 window_width,
+                colour_pallete: default_colour_palette(),
             }
         }
     }
@@ -119,38 +138,33 @@ impl GlowBackendContext {
     pub fn display(&self) {
         unsafe {
             // upload instance attributes
-            // offsets
-            self.gl
-                .bind_buffer(glow::ARRAY_BUFFER, Some(self.instance_offset_buffer));
-            let instance_offsets: Vec<f32> = self
-                .rects
-                .iter()
-                .flat_map(|rect| [rect.offset_x, rect.offset_y])
-                .collect();
-            let instance_offsets_u8 = core::slice::from_raw_parts(
-                instance_offsets.as_ptr() as *const u8,
-                instance_offsets.len() * core::mem::size_of::<f32>(),
+            upload_buffer(
+                self.instance_offset_buffer,
+                self.rects
+                    .iter()
+                    .flat_map(|rect| [rect.offset_x, rect.offset_y])
+                    .collect(),
+                &self.gl,
             );
-            self.gl.buffer_data_u8_slice(
-                glow::ARRAY_BUFFER,
-                instance_offsets_u8,
-                glow::STATIC_DRAW,
+            upload_buffer(
+                self.instance_size_buffer,
+                self.rects
+                    .iter()
+                    .flat_map(|rect| [rect.width, rect.height])
+                    .collect(),
+                &self.gl,
             );
-            // sizes
-            self.gl
-                .bind_buffer(glow::ARRAY_BUFFER, Some(self.instance_size_buffer));
-            let instance_sizes: Vec<f32> = self
-                .rects
-                .iter()
-                .flat_map(|rect| [rect.width, rect.height])
-                .collect();
-            let instance_sizes_u8 = core::slice::from_raw_parts(
-                instance_sizes.as_ptr() as *const u8,
-                instance_sizes.len() * core::mem::size_of::<f32>(),
+            upload_buffer(
+                self.instance_colour_buffer,
+                self.rects
+                    .iter()
+                    .flat_map(|rect| {
+                        let colour = self.colour_pallete[rect.colour_index as usize];
+                        [colour.r, colour.g, colour.b]
+                    })
+                    .collect(),
+                &self.gl,
             );
-            self.gl
-                .buffer_data_u8_slice(glow::ARRAY_BUFFER, instance_sizes_u8, glow::STATIC_DRAW);
-
             // draw
             self.gl
                 .draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, self.rects.len() as i32);
@@ -167,5 +181,67 @@ impl GlowBackendContext {
 
     pub fn clear(&mut self) {
         self.rects.clear();
+    }
+}
+
+fn default_colour_palette() -> [Colour; 256] {
+    let mut palette = [Colour {
+        r: 0.0,
+        g: 0.0,
+        b: 0.0,
+    }; 256];
+    // greys
+    palette[0] = Colour {
+        r: 0.0,
+        g: 0.0,
+        b: 0.0,
+    };
+    palette[1] = Colour {
+        r: 0.37,
+        g: 0.37,
+        b: 0.42,
+    }; //todo
+    palette[2] = Colour {
+        r: 0.37,
+        g: 0.37,
+        b: 0.42,
+    }; //todo
+    palette[3] = Colour {
+        r: 0.37,
+        g: 0.37,
+        b: 0.42,
+    }; //todo
+    palette[4] = Colour {
+        r: 0.37,
+        g: 0.37,
+        b: 0.42,
+    };
+    palette[5] = Colour {
+        r: 0.57,
+        g: 0.59,
+        b: 0.64,
+    };
+    palette[6] = Colour {
+        r: 0.77,
+        g: 0.79,
+        b: 0.85,
+    };
+    palette[7] = Colour {
+        r: 0.91,
+        g: 0.92,
+        b: 0.96,
+    };
+
+    palette
+}
+
+unsafe fn upload_buffer(buffer: NativeBuffer, values: Vec<f32>, gl: &Context) {
+    unsafe {
+        gl.bind_buffer(glow::ARRAY_BUFFER, Some(buffer));
+        let values_u8 = core::slice::from_raw_parts(
+            values.as_ptr() as *const u8,
+            values.len() * core::mem::size_of::<f32>(),
+        );
+        gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, values_u8, glow::STATIC_DRAW);
     }
 }

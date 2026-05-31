@@ -8,6 +8,7 @@ impl Render<GlowBackendContext> for RectangleElement {
             offset_y: (top_left.y as f32 * 2.0) / ctx.window_height as f32 - 1.0,
             width: self.width as f32 / ctx.window_width as f32 * 2.0,
             height: self.height as f32 / ctx.window_height as f32 * 2.0,
+            colour_index: self.colour_index,
         })
     }
 }

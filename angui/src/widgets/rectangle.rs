@@ -3,11 +3,12 @@ use crate::traits::{FixedHeight, FixedWidth};
 pub struct RectangleElement {
     pub width: usize,
     pub height: usize,
+    pub colour_index: u8,
 }
 
 impl RectangleElement {
-    pub fn new(width: usize, height: usize) -> Box<Self> {
-        Box::new(Self { width, height })
+    pub fn new(width: usize, height: usize, colour_index: u8) -> Box<Self> {
+        Box::new(Self { width, height, colour_index })
     }
 }
 

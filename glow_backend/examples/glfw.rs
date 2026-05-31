@@ -26,8 +26,8 @@ fn main() {
     while !window.should_close() {
         ctx.clear();
         HorizontalContainer::new(10)
-            .add_child(RectangleElement::new(20, 50))
-            .add_child(RectangleElement::new(50, 200))
+            .add_child(RectangleElement::new(20, 50, 7))
+            .add_child(RectangleElement::new(50, 200, 1))
             .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 
