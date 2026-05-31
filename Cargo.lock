@@ -112,6 +112,7 @@ dependencies = [
 name = "glow_backend"
 version = "0.1.0"
 dependencies = [
+ "angui",
  "glfw",
  "glow",
 ]
