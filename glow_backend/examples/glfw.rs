@@ -1,4 +1,4 @@
-use angui::{Position, Render, widgets::RectangleElement};
+use angui::{Position, Render, pure_containers::HorizontalContainer, widgets::RectangleElement};
 use glfw::{Action, Context, Key, fail_on_errors};
 use glow_backend::GlowBackendContext;
 
@@ -25,7 +25,10 @@ fn main() {
     // Run the app:
     while !window.should_close() {
         ctx.clear();
-        RectangleElement::new(20, 50).render(&mut ctx, Position::new(1880, 50));
+        HorizontalContainer::new(10)
+            .add_child(RectangleElement::new(20, 50))
+            .add_child(RectangleElement::new(50, 200))
+            .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 
         window.swap_buffers();

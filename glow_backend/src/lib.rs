@@ -109,26 +109,7 @@ impl GlowBackendContext {
                 gl,
                 instance_offset_buffer,
                 instance_size_buffer,
-                rects: vec![
-                    // Rect {
-                    //     offset_x: 0.0,
-                    //     offset_y: 0.0,
-                    //     width: 1.0,
-                    //     height: 1.0,
-                    // },
-                    // Rect {
-                    //     offset_x: -0.5,
-                    //     offset_y: -0.5,
-                    //     width: 0.1,
-                    //     height: 1.0,
-                    // },
-                    // Rect {
-                    //     offset_x: -1.2,
-                    //     offset_y: 0.0,
-                    //     width: 1.0,
-                    //     height: 1.0,
-                    // },
-                ],
+                rects: vec![],
                 window_height,
                 window_width,
             }
