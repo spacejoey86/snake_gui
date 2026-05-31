@@ -6,3 +6,6 @@ pub use label::Label;
 
 mod separator;
 pub use separator::VerticalSeparator;
+
+mod button;
+pub use button::Button;

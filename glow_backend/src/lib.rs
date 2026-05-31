@@ -122,6 +122,9 @@ impl GlowBackendContext {
             // set initial window size
             gl.viewport(0, 0, window_width as i32, window_height as i32);
 
+            // set clear colour
+            gl.clear_color(1.0, 1.0, 1.0, 1.0);
+
             Self {
                 gl,
                 instance_offset_buffer,
@@ -181,6 +184,9 @@ impl GlowBackendContext {
 
     pub fn clear(&mut self) {
         self.rects.clear();
+        unsafe {
+            self.gl.clear(glow::COLOR_BUFFER_BIT);
+        }
     }
 }
 

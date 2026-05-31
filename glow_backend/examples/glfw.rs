@@ -1,5 +1,9 @@
-use angui::{Position, Render, pure_containers::HorizontalContainer, widgets::RectangleElement};
-use glfw::{Action, Context, Key, fail_on_errors};
+use angui::{
+    Position, Render,
+    pure_containers::HorizontalContainer,
+    widgets::{Button, RectangleElement},
+};
+use glfw::{Action, Context, Key, MouseButton, fail_on_errors};
 use glow_backend::GlowBackendContext;
 
 fn main() {
@@ -22,18 +26,12 @@ fn main() {
         window.get_size().1 as u32,
     );
 
+    let mut mouse_down = false;
+
     // Run the app:
     while !window.should_close() {
-        ctx.clear();
-        HorizontalContainer::new(10)
-            .add_child(RectangleElement::new(20, 50, 7))
-            .add_child(RectangleElement::new(50, 200, 1))
-            .render(&mut ctx, Position::new(0, 0));
-        ctx.display();
-
-        window.swap_buffers();
-
         glfw.poll_events();
+        window.set_mouse_button_polling(true);
         for (_, event) in glfw::flush_messages(&events) {
             match event {
                 glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
@@ -42,8 +40,27 @@ fn main() {
                 glfw::WindowEvent::FramebufferSize(width, height) => {
                     ctx.set_window_size(width as u32, height as u32);
                 }
+                glfw::WindowEvent::MouseButton(MouseButton::Left, action, _) => match action {
+                    Action::Press => {
+                        mouse_down = true;
+                    }
+                    Action::Release => {
+                        mouse_down = false;
+                    }
+                    _ => {}
+                },
                 _ => {}
             }
         }
+
+        ctx.clear();
+        HorizontalContainer::new(10)
+            .add_child(RectangleElement::new(20, 50, 7))
+            .add_child(RectangleElement::new(50, 200, 1))
+            .add_child(Button::new(mouse_down))
+            .render(&mut ctx, Position::new(0, 0));
+        ctx.display();
+
+        window.swap_buffers();
     }
 }
