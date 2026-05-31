@@ -1,3 +1,4 @@
+use angui::{Position, Render, widgets::RectangleElement};
 use glfw::{Action, Context, Key, fail_on_errors};
 use glow_backend::GlowBackendContext;
 
@@ -15,12 +16,17 @@ fn main() {
             window.get_proc_address(string).unwrap() as *const _
         })
     };
-    let backend_context = GlowBackendContext::new(glow_context);
-    backend_context.set_window_size(window.get_size().0, window.get_size().1);
+    let mut ctx = GlowBackendContext::new(
+        glow_context,
+        window.get_size().0 as u32,
+        window.get_size().1 as u32,
+    );
 
     // Run the app:
     while !window.should_close() {
-        backend_context.display();
+        ctx.clear();
+        RectangleElement::new(20, 50).render(&mut ctx, Position::new(1880, 50));
+        ctx.display();
 
         window.swap_buffers();
 
@@ -29,6 +35,10 @@ fn main() {
             match event {
                 glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
                     window.set_should_close(true)
+                }
+                glfw::WindowEvent::FramebufferSize(width, height) => {
+                    ctx.set_window_size(width as u32, height as u32);
+                    println!("size changed");
                 }
                 _ => {}
             }

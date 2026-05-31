@@ -7,6 +7,8 @@ pub struct GlowBackendContext {
     instance_offset_buffer: NativeBuffer,
     instance_size_buffer: NativeBuffer,
     rects: Vec<Rect>,
+    window_width: u32,
+    window_height: u32,
 }
 
 struct Rect {
@@ -44,7 +46,7 @@ void main()
 ";
 
 impl GlowBackendContext {
-    pub fn new(gl: Context) -> Self {
+    pub fn new(gl: Context, window_width: u32, window_height: u32) -> Self {
         unsafe {
             // upload shaders
             let shader_program = gl.create_program().unwrap();
@@ -100,30 +102,35 @@ impl GlowBackendContext {
 
             // todo: font texture
 
+            // set initial window size
+            gl.viewport(0, 0, window_width as i32, window_height as i32);
+
             Self {
                 gl,
                 instance_offset_buffer,
                 instance_size_buffer,
                 rects: vec![
-                    Rect {
-                        offset_x: 0.0,
-                        offset_y: 0.0,
-                        width: 1.0,
-                        height: 1.0,
-                    },
-                    Rect {
-                        offset_x: -0.5,
-                        offset_y: -0.5,
-                        width: 0.1,
-                        height: 1.0,
-                    },
-                    Rect {
-                        offset_x: -1.2,
-                        offset_y: 0.0,
-                        width: 1.0,
-                        height: 1.0,
-                    },
+                    // Rect {
+                    //     offset_x: 0.0,
+                    //     offset_y: 0.0,
+                    //     width: 1.0,
+                    //     height: 1.0,
+                    // },
+                    // Rect {
+                    //     offset_x: -0.5,
+                    //     offset_y: -0.5,
+                    //     width: 0.1,
+                    //     height: 1.0,
+                    // },
+                    // Rect {
+                    //     offset_x: -1.2,
+                    //     offset_y: 0.0,
+                    //     width: 1.0,
+                    //     height: 1.0,
+                    // },
                 ],
+                window_height,
+                window_width,
             }
         }
     }
@@ -169,9 +176,15 @@ impl GlowBackendContext {
         }
     }
 
-    pub fn set_window_size(&self, width: i32, height: i32) {
+    pub fn set_window_size(&mut self, width: u32, height: u32) {
+        self.window_width = width;
+        self.window_height = height;
         unsafe {
-            self.gl.viewport(0, 0, width, height);
+            self.gl.viewport(0, 0, width as i32, height as i32);
         }
+    }
+
+    pub fn clear(&mut self) {
+        self.rects.clear();
     }
 }
