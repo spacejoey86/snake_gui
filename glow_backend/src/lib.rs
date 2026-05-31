@@ -1,6 +1,6 @@
 mod widgets;
 
-use glow::{Context, HasContext, Program};
+use glow::{Context, HasContext};
 
 pub struct GlowBackendContext {
     gl: Context,
@@ -8,7 +8,7 @@ pub struct GlowBackendContext {
 
 const VERTEX_SHADER_SOURCE: &str = "
 #version 330 core
-layout (location = 0) in vec2 vertexPos
+layout (location = 0) in vec2 vertexPos;
 
 out vec3 fColor;
 
