@@ -36,10 +36,12 @@ layout (location = 2) in vec2 instanceSize;
 layout (location = 3) in vec3 instanceColour;
 
 out vec3 fColor;
+out vec2 TexCoord;
 
 void main()
 {
     gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
+    TexCoord = vertexPos;
     fColor = instanceColour;
 }
 ";
@@ -49,10 +51,16 @@ const FRAGMENT_SHADER_SOURCE: &str = "
 out vec4 FragColor;
 
 in vec3 fColor;
+in vec2 TexCoord; // interpolated by the gpu
+
+uniform sampler2D fontTexture;
 
 void main()
 {
-    FragColor = vec4(fColor, 1.0);
+    vec2 sample_coord = vec2(0.2, 0.1);
+    vec4 myvar = texture(fontTexture, TexCoord);
+    FragColor = vec4(myvar.r, 0.0, 0.0, 1.0);
+    //FragColor = vec4(fColor, 1.0);
 }
 ";
 
@@ -118,6 +126,30 @@ impl GlowBackendContext {
             gl.vertex_attrib_divisor(3, 1);
 
             // todo: font texture
+            let font_texture = gl.create_texture().unwrap();
+            gl.active_texture(0);
+            gl.bind_texture(glow::TEXTURE_2D, Some(font_texture));
+            // todo: set texture parameters?
+            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_S, glow::REPEAT as i32);
+            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_T, glow::REPEAT as i32);
+            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_MIN_FILTER , glow::NEAREST as i32);
+            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_MAG_FILTER, glow::LINEAR as i32);
+            // load texture
+            // generate some random data. todo: load an actual font
+            let data: Vec<u8> = (0..10*26*16)
+                .map(|index| if true {(index % 256) as u8} else {0})
+                .collect();
+            gl.tex_image_2d(
+                glow::TEXTURE_2D,
+                0,
+                glow::RED as i32,
+                260,
+                16,
+                0,
+                glow::RED,
+                glow::UNSIGNED_BYTE,
+                glow::PixelUnpackData::Slice(Some(data.as_slice())),
+            );
 
             // set initial window size
             gl.viewport(0, 0, window_width as i32, window_height as i32);
