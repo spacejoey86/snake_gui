@@ -2,16 +2,29 @@ mod widgets;
 
 use glow::{Context, HasContext, NativeBuffer};
 
+// general backend architecture
+// constructing the backend does the opengl setup
+// each frame, upload instance data to gpu
+// everything is rendered as instanced rectangles
+// rendered back to front with transparency
+// rectangles sample a font texture
+// for rectangles that aren't text, the font texture has an opaque section with no pattern
+
 pub struct GlowBackendContext {
     gl: Context,
+    // buffers for uploading instance data to the gpu each frame
     instance_offset_buffer: NativeBuffer,
     instance_size_buffer: NativeBuffer,
     instance_colour_buffer: NativeBuffer,
     instance_texture_offset_buffer: NativeBuffer,
+    // accumulate rects during UI render calls
+    // used in Self::display()
     rects: Vec<Rect>,
+    // positions are in screen space, which depends on the window size
     window_width: u32,
     window_height: u32,
-    colour_pallete: [Colour; 256],
+    // colours are picked from a palette
+    colour_palette: [Colour; 256],
 }
 
 #[derive(Copy, Clone)]
@@ -27,25 +40,32 @@ struct Rect {
     width: f32,
     height: f32,
     colour_index: u8,
+    // there is one font texture
+    // at offset zero, there is a filled character
+    // equivalent to not using any texture
     texture_offset_x: f32,
     texture_offset_y: f32,
 }
 
 const VERTEX_SHADER_SOURCE: &str = "
 #version 330 core
-layout (location = 0) in vec2 vertexPos;
+layout (location = 0) in vec2 vertexPos; // same for all instances
+// instance data, different for each instance
 layout (location = 1) in vec2 instanceOffset;
 layout (location = 2) in vec2 instanceSize;
 layout (location = 3) in vec3 instanceColour;
 layout (location = 4) in vec2 textureOffset;
 
 out vec3 fColor;
-out vec2 TexCoord;
+out vec2 TexCoord; // gets interpolated by gpu before the fragment shader
 
 void main()
 {
-    gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
-    TexCoord = vec2(vertexPos.x / 28.0 + textureOffset.x, vertexPos.y + textureOffset.y);
+    gl_Position = vec4((vertexPos * instanceSize + instanceOffset) // scale and position the rect
+        * vec2(1.0, -1.0), // flip to put origin in top left
+        0.0, // not using depth
+        1.0); // w component, not used
+    TexCoord = vec2(vertexPos.x / 28.0 + textureOffset.x, vertexPos.y + textureOffset.y); // output coordinates for texture sampling
     fColor = instanceColour;
 }
 ";
@@ -61,13 +81,16 @@ uniform sampler2D fontTexture;
 
 void main()
 {
-    vec4 myvar = texture(fontTexture, TexCoord);
-    FragColor = vec4(fColor, myvar.r);
+    float texture_alpha = texture(fontTexture, TexCoord).r; // only the r component is set
+    // which we use as an alpha value
+    FragColor = vec4(fColor, texture_alpha);
 }
 ";
 
 impl GlowBackendContext {
     pub fn new(gl: Context, window_width: u32, window_height: u32) -> Self {
+        // unsafe is mostly just opengl calls
+        // and a few unsafe conversions of slice types
         unsafe {
             // upload shaders
             let shader_program = gl.create_program().unwrap();
@@ -92,17 +115,18 @@ impl GlowBackendContext {
 
             // create buffers
 
-            // vertices of my rectangle
+            // vertices of the rectangle
+            // reused for every instance
             let vertex_array = gl.create_vertex_array().unwrap(); // this is the state, stores which vertex buffer is used
-            gl.bind_vertex_array(Some(vertex_array)); // do I need to bind once here, and/or every render call?
-            let vertex_buffer = gl.create_buffer().unwrap(); // this actually stores the vertices
+            gl.bind_vertex_array(Some(vertex_array));
+            let vertex_buffer = gl.create_buffer().unwrap(); // this will actually contain the vertices
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(vertex_buffer));
             // the vertices are an attribute passed to the vertex shader:
-            gl.enable_vertex_attrib_array(0);
+            gl.enable_vertex_attrib_array(0); // each attribure array has an index, matching the definition in the shader
             gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 0, 0);
             // upload the vertices to the gpu
             let vertices: [f32; _] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
-            let vertices_u8 = core::slice::from_raw_parts(
+            let vertices_u8 = core::slice::from_raw_parts( // actual unsafe call
                 vertices.as_ptr() as *const u8,
                 vertices.len() * core::mem::size_of::<f32>(),
             );
@@ -112,8 +136,8 @@ impl GlowBackendContext {
             let instance_offset_buffer = gl.create_buffer().unwrap();
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_offset_buffer));
             gl.enable_vertex_attrib_array(1);
-            gl.vertex_attrib_pointer_f32(1, 2, glow::FLOAT, false, 0, 0); // should the stride be set?
-            gl.vertex_attrib_divisor(1, 1);
+            gl.vertex_attrib_pointer_f32(1, 2, glow::FLOAT, false, 0, 0);
+            gl.vertex_attrib_divisor(1, 1); // different value for every instance
             // instance size buffer
             let instance_size_buffer = gl.create_buffer().unwrap();
             gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_size_buffer));
@@ -133,11 +157,11 @@ impl GlowBackendContext {
             gl.vertex_attrib_pointer_f32(4, 2, glow::FLOAT, false, 0, 0);
             gl.vertex_attrib_divisor(4, 1);
 
-            // todo: font texture
+            // upload font texture
             let font_texture = gl.create_texture().unwrap();
             gl.active_texture(0);
             gl.bind_texture(glow::TEXTURE_2D, Some(font_texture));
-            // todo: set texture parameters?
+            // not sure if wrap params are necessary?
             gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_S, glow::REPEAT as i32);
             gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_T, glow::REPEAT as i32);
             gl.tex_parameter_i32(
@@ -183,7 +207,7 @@ impl GlowBackendContext {
                 rects: vec![],
                 window_height,
                 window_width,
-                colour_pallete: default_colour_palette(),
+                colour_palette: default_colour_palette(),
             }
         }
     }
@@ -212,7 +236,7 @@ impl GlowBackendContext {
                 self.rects
                     .iter()
                     .flat_map(|rect| {
-                        let colour = self.colour_pallete[rect.colour_index as usize];
+                        let colour = self.colour_palette[rect.colour_index as usize];
                         [colour.r, colour.g, colour.b]
                     })
                     .collect(),
@@ -226,6 +250,7 @@ impl GlowBackendContext {
                     .collect(),
                 &self.gl,
             );
+
             // draw
             self.gl
                 .draw_arrays_instanced(glow::TRIANGLE_STRIP, 0, 4, self.rects.len() as i32);
@@ -310,8 +335,8 @@ unsafe fn upload_buffer(buffer: NativeBuffer, values: Vec<f32>, gl: &Context) {
     }
 }
 
-const FONT_NUM_CHARACTERS: usize = 28;
-const FONT_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const FONT_NUM_CHARACTERS: usize = 28; // constant is duplicated in vertex shader. todo: fix
+const FONT_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // ignoring the two special chars at the start
 
 /// data, width, height
 fn font_data() -> (Vec<u8>, u32, u32) {

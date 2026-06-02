@@ -21,7 +21,8 @@ impl Render<GlowBackendContext> for Label {
         let char_height = 16;
         for char in self.text.chars() {
             if char != ' ' {
-                let char_index = FONT_CHARS.find(char).map(|i| i + 2).unwrap_or(1);
+                let char_index = FONT_CHARS.find(char).map(|i| i + 2 // two special characters
+                    ).unwrap_or(1); // index 1 is a box, to replace characters not in this font
                 let x = top_left.x + (x_offset * char_width);
                 ctx.rects.push(Rect {
                     offset_x: (x as f32 * 2.0) / ctx.window_width as f32 - 1.0,
