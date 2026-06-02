@@ -45,7 +45,7 @@ out vec2 TexCoord;
 void main()
 {
     gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
-    TexCoord = vec2(vertexPos.x / 28.0 + textureOffset.x, vertexPos.y + textureOffset.y); //todo: scale and add texture offset
+    TexCoord = vec2(vertexPos.x / 28.0 + textureOffset.x, vertexPos.y + textureOffset.y);
     fColor = instanceColour;
 }
 ";
@@ -151,11 +151,7 @@ impl GlowBackendContext {
                 glow::NEAREST as i32,
             );
             // load texture
-            // generate some random data. todo: load an actual font
             let (font_data, font_width, font_height) = font_data();
-            // let data: Vec<u8> = (0..10*26*16)
-            //     .map(|index| if true {(index % 256) as u8} else {0})
-            //     .collect();
             gl.tex_image_2d(
                 glow::TEXTURE_2D,
                 0,
