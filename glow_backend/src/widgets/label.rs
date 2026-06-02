@@ -20,10 +20,8 @@ impl Render<GlowBackendContext> for Label {
         let char_width = font_data().1 as usize / FONT_NUM_CHARACTERS;
         let char_height = 16;
         for char in self.text.chars() {
-            // if char != ' ' {
-            //     let char_index = FONT_CHARS.find(char).map(|i| i + 2).unwrap_or(1)
-            // }
-            if let Some(char_index) = FONT_CHARS.find(char) {
+            if char != ' ' {
+                let char_index = FONT_CHARS.find(char).map(|i| i + 2).unwrap_or(1);
                 let x = top_left.x + (x_offset * char_width);
                 ctx.rects.push(Rect {
                     offset_x: (x as f32 * 2.0) / ctx.window_width as f32 - 1.0,
@@ -31,7 +29,7 @@ impl Render<GlowBackendContext> for Label {
                     width: char_width as f32 / ctx.window_width as f32 * 2.0,
                     height: char_height as f32 / ctx.window_height as f32 * 2.0,
                     colour_index: 1,
-                    texture_offset_x: (char_index + 2) as f32 / FONT_NUM_CHARACTERS as f32,
+                    texture_offset_x: char_index as f32 / FONT_NUM_CHARACTERS as f32,
                     texture_offset_y: 0.0,
                 })
             }
