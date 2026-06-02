@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 angui = { path = "../angui" }
+bmp = "0.5.0"
 glow = "0.17.0"
 
 [dev-dependencies]

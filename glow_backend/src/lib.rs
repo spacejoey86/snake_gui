@@ -7,6 +7,7 @@ pub struct GlowBackendContext {
     instance_offset_buffer: NativeBuffer,
     instance_size_buffer: NativeBuffer,
     instance_colour_buffer: NativeBuffer,
+    instance_texture_offset_buffer: NativeBuffer,
     rects: Vec<Rect>,
     window_width: u32,
     window_height: u32,
@@ -26,6 +27,8 @@ struct Rect {
     width: f32,
     height: f32,
     colour_index: u8,
+    texture_offset_x: f32,
+    texture_offset_y: f32,
 }
 
 const VERTEX_SHADER_SOURCE: &str = "
@@ -34,6 +37,7 @@ layout (location = 0) in vec2 vertexPos;
 layout (location = 1) in vec2 instanceOffset;
 layout (location = 2) in vec2 instanceSize;
 layout (location = 3) in vec3 instanceColour;
+layout (location = 4) in vec2 textureOffset;
 
 out vec3 fColor;
 out vec2 TexCoord;
@@ -41,7 +45,7 @@ out vec2 TexCoord;
 void main()
 {
     gl_Position = vec4((vertexPos * instanceSize + instanceOffset) * vec2(1.0, -1.0), 0.0, 1.0);
-    TexCoord = vertexPos;
+    TexCoord = vec2(vertexPos.x / 28.0 + textureOffset.x, vertexPos.y + textureOffset.y); //todo: scale and add texture offset
     fColor = instanceColour;
 }
 ";
@@ -57,10 +61,8 @@ uniform sampler2D fontTexture;
 
 void main()
 {
-    vec2 sample_coord = vec2(0.2, 0.1);
     vec4 myvar = texture(fontTexture, TexCoord);
-    FragColor = vec4(myvar.r, 0.0, 0.0, 1.0);
-    //FragColor = vec4(fColor, 1.0);
+    FragColor = vec4(fColor, myvar.r);
 }
 ";
 
@@ -124,6 +126,12 @@ impl GlowBackendContext {
             gl.enable_vertex_attrib_array(3);
             gl.vertex_attrib_pointer_f32(3, 3, glow::FLOAT, false, 0, 0);
             gl.vertex_attrib_divisor(3, 1);
+            // instance texture offset buffer
+            let instance_texture_offset_buffer = gl.create_buffer().unwrap();
+            gl.bind_buffer(glow::ARRAY_BUFFER, Some(instance_texture_offset_buffer));
+            gl.enable_vertex_attrib_array(4);
+            gl.vertex_attrib_pointer_f32(4, 2, glow::FLOAT, false, 0, 0);
+            gl.vertex_attrib_divisor(4, 1);
 
             // todo: font texture
             let font_texture = gl.create_texture().unwrap();
@@ -132,24 +140,37 @@ impl GlowBackendContext {
             // todo: set texture parameters?
             gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_S, glow::REPEAT as i32);
             gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_WRAP_T, glow::REPEAT as i32);
-            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_MIN_FILTER , glow::NEAREST as i32);
-            gl.tex_parameter_i32(glow::TEXTURE_2D, glow::TEXTURE_MAG_FILTER, glow::LINEAR as i32);
+            gl.tex_parameter_i32(
+                glow::TEXTURE_2D,
+                glow::TEXTURE_MIN_FILTER,
+                glow::NEAREST as i32,
+            );
+            gl.tex_parameter_i32(
+                glow::TEXTURE_2D,
+                glow::TEXTURE_MAG_FILTER,
+                glow::NEAREST as i32,
+            );
             // load texture
             // generate some random data. todo: load an actual font
-            let data: Vec<u8> = (0..10*26*16)
-                .map(|index| if true {(index % 256) as u8} else {0})
-                .collect();
+            let (font_data, font_width, font_height) = font_data();
+            // let data: Vec<u8> = (0..10*26*16)
+            //     .map(|index| if true {(index % 256) as u8} else {0})
+            //     .collect();
             gl.tex_image_2d(
                 glow::TEXTURE_2D,
                 0,
                 glow::RED as i32,
-                260,
-                16,
+                font_width as i32,
+                font_height as i32,
                 0,
                 glow::RED,
                 glow::UNSIGNED_BYTE,
-                glow::PixelUnpackData::Slice(Some(data.as_slice())),
+                glow::PixelUnpackData::Slice(Some(font_data.as_slice())),
             );
+
+            // enable blending
+            gl.enable(glow::BLEND);
+            gl.blend_func(glow::SRC_ALPHA, glow::ONE_MINUS_SRC_ALPHA);
 
             // set initial window size
             gl.viewport(0, 0, window_width as i32, window_height as i32);
@@ -162,6 +183,7 @@ impl GlowBackendContext {
                 instance_offset_buffer,
                 instance_size_buffer,
                 instance_colour_buffer,
+                instance_texture_offset_buffer,
                 rects: vec![],
                 window_height,
                 window_width,
@@ -197,6 +219,14 @@ impl GlowBackendContext {
                         let colour = self.colour_pallete[rect.colour_index as usize];
                         [colour.r, colour.g, colour.b]
                     })
+                    .collect(),
+                &self.gl,
+            );
+            upload_buffer(
+                self.instance_texture_offset_buffer,
+                self.rects
+                    .iter()
+                    .flat_map(|rect| [rect.texture_offset_x, rect.texture_offset_y])
                     .collect(),
                 &self.gl,
             );
@@ -282,4 +312,22 @@ unsafe fn upload_buffer(buffer: NativeBuffer, values: Vec<f32>, gl: &Context) {
         );
         gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, values_u8, glow::STATIC_DRAW);
     }
+}
+
+const FONT_NUM_CHARACTERS: usize = 28;
+const FONT_CHARS: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/// data, width, height
+fn font_data() -> (Vec<u8>, u32, u32) {
+    const FILE: &[u8] = include_bytes!("../font.bmp");
+    let mut data_reader = FILE;
+    let image = bmp::from_reader(&mut data_reader).unwrap();
+    let mut output_data = vec![];
+    for y in 0..image.get_height() {
+        for x in 0..image.get_width() {
+            let pixel = image.get_pixel(x, y);
+            output_data.push(u8::MAX - pixel.r)
+        }
+    }
+    (output_data, image.get_width(), image.get_height())
 }

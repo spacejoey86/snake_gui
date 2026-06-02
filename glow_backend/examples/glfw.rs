@@ -1,7 +1,7 @@
 use angui::{
     Position, Render,
     pure_containers::HorizontalContainer,
-    widgets::{Button, RectangleElement},
+    widgets::{Button, Label, RectangleElement},
 };
 use glfw::{Action, Context, Key, MouseButton, fail_on_errors};
 use glow_backend::GlowBackendContext;
@@ -58,6 +58,7 @@ fn main() {
             .add_child(RectangleElement::new(20, 50, 7))
             .add_child(RectangleElement::new(50, 200, 1))
             .add_child(Button::new(mouse_down))
+            .add_child(Label::new("TEST TEXT"))
             .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 
