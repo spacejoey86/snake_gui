@@ -35,10 +35,11 @@ impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
         }
     }
 
-    pub fn add_child(
+    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext>>>(
         mut self,
-        child: ElementFixedWidthGrowingHeight<BackendContext>,
+        child: T,
     ) -> Result<Box<Self>, ()> {
+        let child = child.into();
         if child.width() > self.wrap_width {
             return Err(());
         }

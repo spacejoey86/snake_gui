@@ -11,12 +11,12 @@ use angui::{
 fn main() {
     let root = BorderContainer::new(
         HorizontalContainer::new(1)
-            .add_child(CharRectangle::new(30, 10, 'a').into())
+            .add_child(CharRectangle::new(30, 10, 'a'))
             .add_child(VerticalSeparator::new())
-            .add_child(PaddingContainer::all(Label::new("Test label"), 1).into())
-            .add_child(CharRectangle::new(5, 15, 'b').into())
-            .add_child(HorizontalSpacer::new(1).into())
-            .add_child(CharRectangle::new(3, 3, 'c').into())
+            .add_child(PaddingContainer::all(Label::new("Test label"), 1))
+            .add_child(CharRectangle::new(5, 15, 'b'))
+            .add_child(HorizontalSpacer::new(1))
+            .add_child(CharRectangle::new(3, 3, 'c'))
             .build(),
     );
 
