@@ -1,27 +1,25 @@
-use crate::traits::{FixedHeight, FixedWidth};
+use std::marker::PhantomData;
 
-pub struct RectangleElement {
+use crate::{ElementFixedSize, ElementFixedSizeTrait};
+
+pub struct RectangleElement<BackendContext> {
     pub width: usize,
     pub height: usize,
     pub colour_index: u8,
+    phantom: PhantomData<BackendContext>
 }
 
-impl RectangleElement {
-    pub fn new(width: usize, height: usize, colour_index: u8) -> Box<Self> {
-        Box::new(Self { width, height, colour_index })
+impl<BackendContext: 'static> RectangleElement<BackendContext> where RectangleElement<BackendContext>: ElementFixedSizeTrait<BackendContext> {
+    pub fn new(width: usize, height: usize, colour_index: u8) -> ElementFixedSize<BackendContext> {
+        ElementFixedSize {
+            inner: Box::new(Self {
+                width,
+                height,
+                colour_index,
+                phantom: PhantomData,
+            }),
+        }
     }
 }
 
-impl<BackendContext> FixedWidth<BackendContext> for RectangleElement {
-    fn width(&self) -> usize {
-        self.width
-    }
-}
-
-impl<BackendContext> FixedHeight<BackendContext> for RectangleElement {
-    fn height(&self) -> usize {
-        self.height
-    }
-}
-
-// Backends should implement Render
+// Backends should implement ElementFixedSize

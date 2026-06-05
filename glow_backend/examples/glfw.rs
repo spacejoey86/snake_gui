@@ -1,5 +1,5 @@
 use angui::{
-    Position, Render,
+    Position, ElementFixedSizeTrait,
     pure_containers::{HorizontalContainer, PaddingContainer},
     widgets::{Button, Label, RectangleElement},
 };
@@ -55,10 +55,10 @@ fn main() {
 
         ctx.clear();
         HorizontalContainer::new(10)
-            .add_child(RectangleElement::new(20, 50, 7))
-            .add_child(RectangleElement::new(50, 200, 1))
-            .add_child(Button::new(mouse_down))
-            .add_child(PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4))
+            .add_child(RectangleElement::new(20, 50, 7).into())
+            .add_child(RectangleElement::new(50, 200, 1).into())
+            .add_child(Button::new(mouse_down).into())
+            .add_child(PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4).into())
             .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 

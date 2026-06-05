@@ -1,10 +1,23 @@
-pub struct Button {
+use std::marker::PhantomData;
+
+use crate::{ElementFixedSize, ElementFixedSizeTrait};
+
+pub struct Button<BackendContext> {
     pub down: bool,
+    phantom: PhantomData<BackendContext>,
 }
 
-impl Button {
-    pub fn new(down: bool) -> Box<Self> {
-        Box::new(Self { down })
+impl<BackendContext: 'static> Button<BackendContext>
+where
+    Button<BackendContext>: ElementFixedSizeTrait<BackendContext>,
+{
+    pub fn new(down: bool) -> ElementFixedSize<BackendContext> {
+        ElementFixedSize {
+            inner: Box::new(Self {
+                down,
+                phantom: PhantomData,
+            }),
+        }
     }
 }
 

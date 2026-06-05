@@ -1,5 +1,5 @@
 use crate::PrintBackendCTX;
-use angui::{FixedHeight, FixedWidth, Position, Render};
+use angui::{FixedHeight, FixedWidth, Position, ElementFixedSizeTrait};
 
 pub struct CharRectangle {
     width: usize,
@@ -17,7 +17,7 @@ impl CharRectangle {
     }
 }
 
-impl Render<PrintBackendCTX> for CharRectangle {
+impl ElementFixedSizeTrait<PrintBackendCTX> for CharRectangle {
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
         for y in 0..self.height {
             for x in 0..self.width {

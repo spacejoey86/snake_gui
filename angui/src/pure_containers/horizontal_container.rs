@@ -1,20 +1,14 @@
-use crate::{
-    position::Position,
-    traits::{FixedHeight, FixedWidth, GrowingHeight, Render, RenderGrowHeight},
-};
+use crate::{ElementFixedWidthGrowingHeight, position::Position, traits::ElementFixedSizeTrait};
 
 /// Place elements one after the other horizontally.
 /// Adds spacing between elements.
 /// Allows element's height to grow to match the tallest element.
-pub struct HorizontalContainer<T: ?Sized> {
-    children: Vec<Box<T>>,
+pub struct HorizontalContainer<BackendContext> {
+    children: Vec<ElementFixedWidthGrowingHeight<BackendContext>>,
     spacing: usize,
 }
 
-impl<T: ?Sized, BackendContext> FixedWidth<BackendContext> for HorizontalContainer<T>
-where
-    T: FixedWidth<BackendContext>,
-{
+impl<BackendContext> ElementFixedSizeTrait<BackendContext> for HorizontalContainer<BackendContext> {
     fn width(&self) -> usize {
         let spacing = if self.children.len() == 1 {
             0
@@ -28,12 +22,7 @@ where
                 .map(|child| child.width())
                 .sum::<usize>()
     }
-}
 
-impl<T: ?Sized, BackendContext> FixedHeight<BackendContext> for HorizontalContainer<T>
-where
-    T: GrowingHeight<BackendContext>,
-{
     fn height(&self) -> usize {
         self.children
             .iter()
@@ -41,14 +30,7 @@ where
             .max()
             .unwrap_or(0)
     }
-}
 
-impl<T: ?Sized, BackendContext> Render<BackendContext> for HorizontalContainer<T>
-where
-    T: FixedWidth<BackendContext>
-        + RenderGrowHeight<BackendContext>
-        + GrowingHeight<BackendContext>,
-{
     fn render(&self, ctx: &mut BackendContext, top_left: Position) {
         let mut x_offset = 0;
         let height = self.height();
@@ -59,20 +41,8 @@ where
     }
 }
 
-/// trait to help rust infer types
-pub trait ContainerElement<BackendContext>:
-    RenderGrowHeight<BackendContext> + FixedWidth<BackendContext> + GrowingHeight<BackendContext>
-{
-}
-impl<T, BackendContext> ContainerElement<BackendContext> for T where
-    T: RenderGrowHeight<BackendContext>
-        + FixedWidth<BackendContext>
-        + GrowingHeight<BackendContext>
-{
-}
-
-impl<BackendContext> HorizontalContainer<dyn ContainerElement<BackendContext>> {
-    pub fn add_child(mut self, child: Box<dyn ContainerElement<BackendContext>>) -> Box<Self> {
+impl<BackendContext> HorizontalContainer<BackendContext> {
+    pub fn add_child(mut self, child: ElementFixedWidthGrowingHeight<BackendContext>) -> Box<Self> {
         self.children.push(child);
         return Box::new(self);
     }

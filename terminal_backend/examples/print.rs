@@ -6,7 +6,7 @@ use angui::{
     spacers::HorizontalSpacer,
     visual_containers::BorderContainer,
     widgets::{Label, VerticalSeparator},
-    {FixedHeight, FixedWidth, Render},
+    {FixedHeight, FixedWidth, ElementFixedSizeTrait},
 };
 
 fn main() {
@@ -21,6 +21,6 @@ fn main() {
     );
 
     let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
-    Render::render(&root, &mut ctx, Position::new(0, 0)); // render onto buffer
+    ElementFixedSizeTrait::render(&root, &mut ctx, Position::new(0, 0)); // render onto buffer
     ctx.display(); // print the buffer to the terminal
 }

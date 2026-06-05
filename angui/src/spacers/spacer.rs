@@ -1,7 +1,4 @@
-use crate::{
-    position::Position,
-    traits::{FixedHeight, FixedWidth, Render},
-};
+use crate::{position::Position, traits::ElementFixedSizeTrait};
 
 /// Spacer that takes up a specified vertical space.
 /// Does not take up any space horizontally.
@@ -15,19 +12,15 @@ impl VerticalSpacer {
     }
 }
 
-impl<BackendContext> FixedWidth<BackendContext> for VerticalSpacer {
+impl<T> ElementFixedSizeTrait<T> for VerticalSpacer {
     fn width(&self) -> usize {
         0
     }
-}
 
-impl<BackendContext> FixedHeight<BackendContext> for VerticalSpacer {
     fn height(&self) -> usize {
         self.height
     }
-}
 
-impl<T> Render<T> for VerticalSpacer {
     fn render(&self, _ctx: &mut T, _top_left: Position) {}
 }
 
@@ -43,18 +36,14 @@ impl HorizontalSpacer {
     }
 }
 
-impl<BackendContext> FixedWidth<BackendContext> for HorizontalSpacer {
+impl<T> ElementFixedSizeTrait<T> for HorizontalSpacer {
     fn width(&self) -> usize {
         self.width
     }
-}
 
-impl<BackendContext> FixedHeight<BackendContext> for HorizontalSpacer {
     fn height(&self) -> usize {
         0
     }
-}
 
-impl<T> Render<T> for HorizontalSpacer {
     fn render(&self, _ctx: &mut T, _top_left: Position) {}
 }

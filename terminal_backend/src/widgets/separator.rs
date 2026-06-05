@@ -1,4 +1,4 @@
-use angui::{FixedWidth, GrowingHeight, Position, RenderGrowHeight, widgets::VerticalSeparator};
+use angui::{FixedWidth, GrowingHeight, Position, ElementFixedWidthGrowingHeightTrait, widgets::VerticalSeparator};
 
 use crate::PrintBackendCTX;
 
@@ -8,7 +8,7 @@ impl FixedWidth<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
     }
 }
 
-impl RenderGrowHeight<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
+impl ElementFixedWidthGrowingHeightTrait<PrintBackendCTX> for VerticalSeparator<PrintBackendCTX> {
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position, height: usize) {
         for y in 0..height {
             ctx.buffer[top_left.y + y][top_left.x] = '│';

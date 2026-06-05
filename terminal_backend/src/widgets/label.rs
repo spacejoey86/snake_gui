@@ -1,4 +1,4 @@
-use angui::{FixedHeight, FixedWidth, Position, Render, widgets::Label};
+use angui::{FixedHeight, FixedWidth, Position, ElementFixedSizeTrait, widgets::Label};
 
 use crate::PrintBackendCTX;
 
@@ -14,7 +14,7 @@ impl FixedWidth<PrintBackendCTX> for Label {
     }
 }
 
-impl Render<PrintBackendCTX> for Label {
+impl ElementFixedSizeTrait<PrintBackendCTX> for Label {
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
         for (i, char) in self.text.chars().enumerate() {
             ctx.buffer[top_left.y][top_left.x + i] = char

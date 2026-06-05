@@ -1,8 +1,8 @@
-use angui::{Position, Render, widgets::RectangleElement};
+use angui::{Position, ElementFixedSizeTrait, widgets::RectangleElement};
 
 use crate::PrintBackendCTX;
 
-impl Render<PrintBackendCTX> for RectangleElement {
+impl ElementFixedSizeTrait<PrintBackendCTX> for RectangleElement {
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
         for row in 0..self.height {
             for column in 0..self.width {
