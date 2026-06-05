@@ -1,6 +1,9 @@
 use std::marker::PhantomData;
 
-use crate::{ElementFixedWidthGrowingHeight, position::Position, traits::ElementFixedSizeTrait};
+use crate::{
+    ElementFixedSize, ElementFixedWidthGrowingHeight, position::Position,
+    traits::ElementFixedSizeTrait,
+};
 
 /// Place elements next to each other in rows.
 /// If the next element wouldn't fit within wrap_width, place it on a new row.
@@ -15,15 +18,21 @@ pub struct HorizontalWrappingContainer<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext> HorizontalWrappingContainer<BackendContext> {
-    pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Box<Self> {
-        Box::new(Self {
+impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
+    pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Self {
+        Self {
             children: vec![vec![]],
             h_spacing,
             v_spacing,
             wrap_width,
             phantom: PhantomData,
-        })
+        }
+    }
+
+    pub fn build(self) -> ElementFixedSize<BackendContext> {
+        ElementFixedSize {
+            inner: Box::new(self),
+        }
     }
 
     pub fn add_child(
@@ -62,7 +71,7 @@ impl<BackendContext> HorizontalWrappingContainer<BackendContext> {
     }
 }
 
-impl<BackendContext> ElementFixedSizeTrait<BackendContext>
+impl<BackendContext: 'static> ElementFixedSizeTrait<BackendContext>
     for HorizontalWrappingContainer<BackendContext>
 {
     fn width(&self) -> usize {

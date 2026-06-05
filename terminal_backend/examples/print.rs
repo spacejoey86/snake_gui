@@ -6,21 +6,21 @@ use angui::{
     spacers::HorizontalSpacer,
     visual_containers::BorderContainer,
     widgets::{Label, VerticalSeparator},
-    {FixedHeight, FixedWidth, ElementFixedSizeTrait},
 };
 
 fn main() {
     let root = BorderContainer::new(
         HorizontalContainer::new(1)
-            .add_child(CharRectangle::new(30, 10, 'a'))
+            .add_child(CharRectangle::new(30, 10, 'a').into())
             .add_child(VerticalSeparator::new())
-            .add_child(PaddingContainer::all(Label::new("Test label"), 1))
-            .add_child(CharRectangle::new(5, 15, 'b'))
-            .add_child(HorizontalSpacer::new(1))
-            .add_child(CharRectangle::new(3, 3, 'c')),
+            .add_child(PaddingContainer::all(Label::new("Test label"), 1).into())
+            .add_child(CharRectangle::new(5, 15, 'b').into())
+            .add_child(HorizontalSpacer::new(1).into())
+            .add_child(CharRectangle::new(3, 3, 'c').into())
+            .build(),
     );
 
     let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
-    ElementFixedSizeTrait::render(&root, &mut ctx, Position::new(0, 0)); // render onto buffer
+    root.render(&mut ctx, Position::new(0, 0)); // render onto buffer
     ctx.display(); // print the buffer to the terminal
 }

@@ -1,15 +1,22 @@
 use std::marker::PhantomData;
 
+use crate::{ElementFixedWidthGrowingHeight, ElementFixedWidthGrowingHeightTrait};
+
 /// Vertical separator bar to provide visual division of elements
 pub struct VerticalSeparator<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext> VerticalSeparator<BackendContext> {
-    pub fn new() -> Box<Self> {
-        Box::new(Self {
-            phantom: PhantomData,
-        })
+impl<BackendContext: 'static> VerticalSeparator<BackendContext>
+where
+    VerticalSeparator<BackendContext>: ElementFixedWidthGrowingHeightTrait<BackendContext>,
+{
+    pub fn new() -> ElementFixedWidthGrowingHeight<BackendContext> {
+        ElementFixedWidthGrowingHeight {
+            inner: Box::new(Self {
+                phantom: PhantomData,
+            }),
+        }
     }
 }
 

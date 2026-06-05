@@ -1,32 +1,15 @@
 use crate::PrintBackendCTX;
-use angui::{
-    Position,
-    visual_containers::BorderContainer,
-    {FixedHeight, FixedWidth, ElementFixedSizeTrait},
-};
+use angui::{ElementFixedSizeTrait, Position, visual_containers::BorderContainer};
 
-impl<T> FixedHeight<PrintBackendCTX> for BorderContainer<T>
-where
-    T: FixedHeight<PrintBackendCTX>,
-{
-    fn height(&self) -> usize {
-        self.child.height() + 2
-    }
-}
-
-impl<T> FixedWidth<PrintBackendCTX> for BorderContainer<T>
-where
-    T: FixedWidth<PrintBackendCTX>,
-{
+impl ElementFixedSizeTrait<PrintBackendCTX> for BorderContainer<PrintBackendCTX> {
     fn width(&self) -> usize {
         self.child.width() + 2
     }
-}
 
-impl<T> ElementFixedSizeTrait<PrintBackendCTX> for BorderContainer<T>
-where
-    T: ElementFixedSizeTrait<PrintBackendCTX> + FixedHeight<PrintBackendCTX> + FixedWidth<PrintBackendCTX>,
-{
+    fn height(&self) -> usize {
+        self.child.height() + 2
+    }
+
     fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
         // top and bottom borders
         for x in 0..(self.child.width()) {

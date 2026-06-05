@@ -1,4 +1,4 @@
-use crate::{ElementFixedWidthGrowingHeight, position::Position, traits::ElementFixedSizeTrait};
+use crate::{ElementFixedSize, ElementFixedWidthGrowingHeight, position::Position, traits::ElementFixedSizeTrait};
 
 /// Place elements one after the other horizontally.
 /// Adds spacing between elements.
@@ -41,16 +41,20 @@ impl<BackendContext> ElementFixedSizeTrait<BackendContext> for HorizontalContain
     }
 }
 
-impl<BackendContext> HorizontalContainer<BackendContext> {
+impl<BackendContext: 'static> HorizontalContainer<BackendContext> {
     pub fn add_child(mut self, child: ElementFixedWidthGrowingHeight<BackendContext>) -> Box<Self> {
         self.children.push(child);
         return Box::new(self);
     }
 
-    pub fn new(spacing: usize) -> Box<Self> {
-        Box::new(Self {
+    pub fn new(spacing: usize) -> Self {
+        Self {
             children: vec![],
             spacing,
-        })
+        }
+    }
+
+    pub fn build(self) -> ElementFixedSize<BackendContext> {
+        ElementFixedSize { inner: Box::new(self) }
     }
 }
