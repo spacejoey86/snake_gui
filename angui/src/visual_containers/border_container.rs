@@ -12,10 +12,12 @@ impl<BackendContext: 'static> BorderContainer<BackendContext>
 where
     BorderContainer<BackendContext>: ElementFixedSizeTrait<BackendContext>,
 {
-    pub fn new(child: ElementFixedSize<BackendContext>) -> ElementFixedSize<BackendContext> {
+    pub fn new<T: Into<ElementFixedSize<BackendContext>>>(
+        child: T,
+    ) -> ElementFixedSize<BackendContext> {
         ElementFixedSize {
             inner: Box::new(Self {
-                child,
+                child: child.into(),
                 phantom: PhantomData,
             }),
         }

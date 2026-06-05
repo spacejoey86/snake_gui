@@ -17,7 +17,6 @@ fn main() {
             .add_child(CharRectangle::new(5, 15, 'b'))
             .add_child(HorizontalSpacer::new(1))
             .add_child(CharRectangle::new(3, 3, 'c'))
-            .build(),
     );
 
     let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents

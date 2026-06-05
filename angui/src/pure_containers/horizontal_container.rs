@@ -48,9 +48,9 @@ impl<BackendContext: 'static> HorizontalContainer<BackendContext> {
     pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext>>>(
         mut self,
         child: T,
-    ) -> Box<Self> {
+    ) -> Self {
         self.children.push(child.into());
-        return Box::new(self);
+        return self;
     }
 
     pub fn new(spacing: usize) -> Self {
@@ -59,10 +59,10 @@ impl<BackendContext: 'static> HorizontalContainer<BackendContext> {
             spacing,
         }
     }
+}
 
-    pub fn build(self) -> ElementFixedSize<BackendContext> {
-        ElementFixedSize {
-            inner: Box::new(self),
-        }
+impl<BackendContext: 'static> Into<ElementFixedSize<BackendContext>> for HorizontalContainer<BackendContext> {
+    fn into(self) -> ElementFixedSize<BackendContext> {
+        ElementFixedSize { inner: Box::new(self) }
     }
 }
