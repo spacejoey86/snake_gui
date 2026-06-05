@@ -1,6 +1,5 @@
 //! Traits that define UI elements
 //! Elements must implement one of the traits
-//! todo: Blanket implementations for fixed size UI elements to implement the Growable traits
 
 use crate::position::Position;
 
@@ -12,8 +11,7 @@ pub trait ElementFixedSizeTrait<BackendContext, UserState> {
     fn render(self: Box<Self>, ctx: &mut BackendContext, top_left: Position) -> UserState;
 }
 
-/// wrapper around the trait, to erase generics
-/// its not actually erasing any generics, do I need this?
+/// wrapper around the trait, for containers to erase generics of children
 pub struct ElementFixedSize<BackendContext, UserState> {
     pub inner: Box<dyn ElementFixedSizeTrait<BackendContext, UserState>>,
 }
