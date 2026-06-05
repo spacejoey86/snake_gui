@@ -1,13 +1,24 @@
+use std::marker::PhantomData;
+
+use crate::{ElementFixedSize, ElementFixedSizeTrait};
+
 /// Single line text element
-pub struct Label {
+pub struct Label<BackendContext> {
     pub text: String,
+    phantom: PhantomData<BackendContext>,
 }
 
-impl Label {
-    pub fn new(text: &str) -> Box<Self> {
-        Box::new(Self {
-            text: text.to_string(),
-        })
+impl<BackendContext: 'static> Label<BackendContext>
+where
+    Label<BackendContext>: ElementFixedSizeTrait<BackendContext, ()>,
+{
+    pub fn new(text: &str) -> ElementFixedSize<BackendContext, ()> {
+        ElementFixedSize {
+            inner: Box::new(Self {
+                text: text.to_string(),
+                phantom: PhantomData,
+            }),
+        }
     }
 }
 

@@ -1,24 +1,20 @@
-use std::marker::PhantomData;
-
 use crate::{ElementFixedSize, ElementFixedSizeTrait};
 
 /// Container that draws a border around a child
-pub struct BorderContainer<BackendContext> {
-    pub child: ElementFixedSize<BackendContext>,
-    phantom: PhantomData<BackendContext>,
+pub struct BorderContainer<BackendContext, UserState> {
+    pub child: ElementFixedSize<BackendContext, UserState>,
 }
 
-impl<BackendContext: 'static> BorderContainer<BackendContext>
+impl<BackendContext: 'static, UserState: 'static> BorderContainer<BackendContext, UserState>
 where
-    BorderContainer<BackendContext>: ElementFixedSizeTrait<BackendContext>,
+    BorderContainer<BackendContext, UserState>: ElementFixedSizeTrait<BackendContext, UserState>,
 {
-    pub fn new<T: Into<ElementFixedSize<BackendContext>>>(
+    pub fn new<T: Into<ElementFixedSize<BackendContext, UserState>>>(
         child: T,
-    ) -> ElementFixedSize<BackendContext> {
+    ) -> ElementFixedSize<BackendContext, UserState> {
         ElementFixedSize {
             inner: Box::new(Self {
                 child: child.into(),
-                phantom: PhantomData,
             }),
         }
     }

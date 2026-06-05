@@ -1,21 +1,16 @@
-use std::marker::PhantomData;
-
 use crate::{ElementFixedSize, position::Position, traits::ElementFixedSizeTrait};
 
 /// Adds padding around an element
-pub struct PaddingContainer<T, BackendContext> {
+pub struct PaddingContainer<BackendContext, UserState> {
     left: usize,
     right: usize,
     top: usize,
     bottom: usize,
-    child: Box<T>,
-    phantom: PhantomData<BackendContext>,
+    child: ElementFixedSize<BackendContext, UserState>,
 }
 
-impl<T, BackendContext> ElementFixedSizeTrait<BackendContext>
-    for PaddingContainer<T, BackendContext>
-where
-    T: ElementFixedSizeTrait<BackendContext>,
+impl<BackendContext, UserState> ElementFixedSizeTrait<BackendContext, UserState>
+    for PaddingContainer<BackendContext, UserState>
 {
     fn width(&self) -> usize {
         self.left + self.child.width() + self.right
@@ -25,30 +20,39 @@ where
         self.top + self.child.height() + self.bottom
     }
 
-    fn render(&self, ctx: &mut BackendContext, top_left: crate::position::Position) {
+    fn render(
+        self: Box<Self>,
+        ctx: &mut BackendContext,
+        top_left: crate::position::Position,
+    ) -> UserState {
         self.child
-            .render(ctx, top_left + Position::new(self.left, self.top));
+            .render(ctx, top_left + Position::new(self.left, self.top))
     }
 }
 
-impl<T: 'static, BackendContext: 'static> PaddingContainer<T, BackendContext>
-where
-    T: ElementFixedSizeTrait<BackendContext>,
-{
+impl<BackendContext: 'static, UserState: 'static> PaddingContainer<BackendContext, UserState> {
     /// Create a padding container, specifying the padding for each side
-    pub fn new(child: Box<T>, left: usize, right: usize, top: usize, bottom: usize) -> Box<Self> {
+    pub fn new(
+        child: ElementFixedSize<BackendContext, UserState>,
+        left: usize,
+        right: usize,
+        top: usize,
+        bottom: usize,
+    ) -> Box<Self> {
         Box::new(Self {
             left,
             right,
             top,
             bottom,
             child,
-            phantom: PhantomData,
         })
     }
 
     /// Create a padding container with the same padding on each side
-    pub fn all(child: Box<T>, padding: usize) -> ElementFixedSize<BackendContext> {
+    pub fn all(
+        child: ElementFixedSize<BackendContext, UserState>,
+        padding: usize,
+    ) -> ElementFixedSize<BackendContext, UserState> {
         ElementFixedSize {
             inner: Box::new(Self {
                 left: padding,
@@ -56,7 +60,6 @@ where
                 top: padding,
                 bottom: padding,
                 child,
-                phantom: PhantomData,
             }),
         }
     }

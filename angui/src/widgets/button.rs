@@ -9,9 +9,9 @@ pub struct Button<BackendContext> {
 
 impl<BackendContext: 'static> Button<BackendContext>
 where
-    Button<BackendContext>: ElementFixedSizeTrait<BackendContext>,
+    Button<BackendContext>: ElementFixedSizeTrait<BackendContext, ButtonResult>,
 {
-    pub fn new(down: bool) -> ElementFixedSize<BackendContext> {
+    pub fn new(down: bool) -> ElementFixedSize<BackendContext, ButtonResult> {
         ElementFixedSize {
             inner: Box::new(Self {
                 down,
@@ -19,6 +19,12 @@ where
             }),
         }
     }
+}
+
+pub struct ButtonResult {
+    /// button was clicked this frame
+    pub clicked: bool,
+    pub held: bool,
 }
 
 // Backends should implement:

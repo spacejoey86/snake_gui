@@ -1,38 +1,39 @@
 use std::marker::PhantomData;
 
-use crate::traits::ElementFixedSizeTrait;
+use crate::{ElementFixedSize, traits::ElementFixedSizeTrait};
 
 /// container that enforces the child fits within a fixed size
-pub struct FixedSizeContainer<T: ?Sized, BackendContext> {
+pub struct FixedSizeContainer<BackendContext, UserState> {
     width: usize,
     height: usize,
-    child: Box<T>,
+    child: ElementFixedSize<BackendContext, UserState>,
     phantom: PhantomData<BackendContext>,
 }
 
-impl<T: ?Sized, BackendContext> FixedSizeContainer<T, BackendContext>
-where
-    T: ElementFixedSizeTrait<BackendContext>,
-{
+impl<BackendContext: 'static, UserState: 'static> FixedSizeContainer<BackendContext, UserState> {
     /// Returns an error if the child doesn't fit within the specified size
-    pub fn new(width: usize, height: usize, child: Box<T>) -> Result<Box<Self>, ()> {
+    pub fn new(
+        width: usize,
+        height: usize,
+        child: ElementFixedSize<BackendContext, UserState>,
+    ) -> Result<ElementFixedSize<BackendContext, UserState>, ()> {
         if width < child.width() || height < child.height() {
             Err(())
         } else {
-            Ok(Box::new(Self {
-                width,
-                height,
-                child,
-                phantom: PhantomData,
-            }))
+            Ok(ElementFixedSize {
+                inner: Box::new(Self {
+                    width,
+                    height,
+                    child,
+                    phantom: PhantomData,
+                }),
+            })
         }
     }
 }
 
-impl<T: ?Sized, BackendContext> ElementFixedSizeTrait<BackendContext>
-    for FixedSizeContainer<T, BackendContext>
-where
-    T: ElementFixedSizeTrait<BackendContext>,
+impl<BackendContext, UserState> ElementFixedSizeTrait<BackendContext, UserState>
+    for FixedSizeContainer<BackendContext, UserState>
 {
     fn width(&self) -> usize {
         self.width
@@ -42,7 +43,7 @@ where
         self.height
     }
 
-    fn render(&self, ctx: &mut BackendContext, top_left: crate::position::Position) {
+    fn render(self: Box<Self>, ctx: &mut BackendContext, top_left: crate::position::Position) -> UserState {
         self.child.render(ctx, top_left)
     }
 }

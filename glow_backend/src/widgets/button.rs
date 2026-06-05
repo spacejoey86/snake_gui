@@ -1,11 +1,11 @@
 use angui::{
     ElementFixedSizeTrait, Position,
-    widgets::{Button, RectangleElement},
+    widgets::{Button, ButtonResult, RectangleElement},
 };
 
 use crate::GlowBackendContext;
 
-impl ElementFixedSizeTrait<GlowBackendContext> for Button<GlowBackendContext> {
+impl ElementFixedSizeTrait<GlowBackendContext, ButtonResult> for Button<GlowBackendContext> {
     fn width(&self) -> usize {
         50
     }
@@ -14,7 +14,11 @@ impl ElementFixedSizeTrait<GlowBackendContext> for Button<GlowBackendContext> {
         30
     }
 
-    fn render(&self, ctx: &mut GlowBackendContext, top_left: angui::Position) {
+    fn render(
+        self: Box<Self>,
+        ctx: &mut GlowBackendContext,
+        top_left: angui::Position,
+    ) -> ButtonResult {
         let mouse_down_offset = if self.down {
             Position::new(2, 2)
         } else {
@@ -27,5 +31,7 @@ impl ElementFixedSizeTrait<GlowBackendContext> for Button<GlowBackendContext> {
         // top of button
         RectangleElement::new(43, 23, 6)
             .render(ctx, top_left + Position::new(2, 2) + mouse_down_offset);
+
+        ButtonResult { clicked: false, held: false } //todo: return correct values
     }
 }

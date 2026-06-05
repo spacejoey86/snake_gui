@@ -2,7 +2,7 @@ use angui::{ElementFixedSizeTrait, widgets::Label};
 
 use crate::{FONT_CHARS, FONT_NUM_CHARACTERS, GlowBackendContext, Rect, font_data};
 
-impl ElementFixedSizeTrait<GlowBackendContext> for Label {
+impl ElementFixedSizeTrait<GlowBackendContext, ()> for Label<GlowBackendContext> {
     fn width(&self) -> usize {
         font_data().1 as usize / FONT_NUM_CHARACTERS * self.text.len()
     }
@@ -11,7 +11,7 @@ impl ElementFixedSizeTrait<GlowBackendContext> for Label {
         font_data().2 as usize
     }
 
-    fn render(&self, ctx: &mut GlowBackendContext, top_left: angui::Position) {
+    fn render(self: Box<Self>, ctx: &mut GlowBackendContext, top_left: angui::Position) {
         let mut x_offset = 0;
         let char_width = font_data().1 as usize / FONT_NUM_CHARACTERS;
         let char_height = 16;

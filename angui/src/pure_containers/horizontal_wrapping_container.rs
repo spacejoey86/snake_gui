@@ -10,15 +10,17 @@ use crate::{
 /// Adds h_spacing between elements, and v_spacing between rows.
 /// Allows element's height to grow to match the talles element in their row.
 /// Width of this container is the width of the widest row - this might be smaller than wrap_width
-pub struct HorizontalWrappingContainer<BackendContext> {
-    children: Vec<Vec<ElementFixedWidthGrowingHeight<BackendContext>>>,
+pub struct HorizontalWrappingContainer<BackendContext, UserState> {
+    children: Vec<Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>>,
     h_spacing: usize,
     v_spacing: usize,
     wrap_width: usize,
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
+impl<BackendContext: 'static, UserState: 'static>
+    HorizontalWrappingContainer<BackendContext, UserState>
+{
     pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Self {
         Self {
             children: vec![vec![]],
@@ -29,13 +31,14 @@ impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
         }
     }
 
-    pub fn build(self) -> ElementFixedSize<BackendContext> {
+    // todo: replace with into
+    pub fn build(self) -> ElementFixedSize<BackendContext, UserState> {
         ElementFixedSize {
             inner: Box::new(self),
         }
     }
 
-    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext>>>(
+    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext, UserState>>>(
         mut self,
         child: T,
     ) -> Result<Box<Self>, ()> {
@@ -55,7 +58,10 @@ impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
         return Ok(Box::new(self));
     }
 
-    fn row_width(&self, row: &Vec<ElementFixedWidthGrowingHeight<BackendContext>>) -> usize {
+    fn row_width(
+        &self,
+        row: &Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>,
+    ) -> usize {
         let spacing = if row.len() == 0 {
             0
         } else {
@@ -64,7 +70,7 @@ impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
         spacing + row.iter().map(|child| child.width()).sum::<usize>()
     }
 
-    fn row_height(row: &Vec<ElementFixedWidthGrowingHeight<BackendContext>>) -> usize {
+    fn row_height(row: &Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>) -> usize {
         row.iter()
             .map(|child| child.min_height())
             .max()
@@ -72,8 +78,8 @@ impl<BackendContext: 'static> HorizontalWrappingContainer<BackendContext> {
     }
 }
 
-impl<BackendContext: 'static> ElementFixedSizeTrait<BackendContext>
-    for HorizontalWrappingContainer<BackendContext>
+impl<BackendContext: 'static, UserState: 'static> ElementFixedSizeTrait<BackendContext, UserState>
+    for HorizontalWrappingContainer<BackendContext, UserState>
 {
     fn width(&self) -> usize {
         self.children
@@ -102,16 +108,23 @@ impl<BackendContext: 'static> ElementFixedSizeTrait<BackendContext>
             + spacing
     }
 
-    fn render(&self, ctx: &mut BackendContext, top_left: crate::position::Position) {
+    fn render(
+        self: Box<Self>,
+        ctx: &mut BackendContext,
+        top_left: crate::position::Position,
+    ) -> UserState {
         let mut y_offset = 0;
-        for row in &self.children {
+        for row in self.children {
             let mut x_offset = 0;
-            let height = HorizontalWrappingContainer::row_height(row);
+            let height = HorizontalWrappingContainer::row_height(&row);
             for child in row {
+                let width = child.width();
                 child.render(ctx, top_left + Position::new(x_offset, y_offset), height);
-                x_offset += child.width() + self.h_spacing;
+                x_offset += width + self.h_spacing;
             }
             y_offset += height + self.v_spacing
         }
+
+        todo!()
     }
 }

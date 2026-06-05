@@ -1,5 +1,5 @@
 mod horizontal_container;
-pub use horizontal_container::HorizontalContainer;
+pub use horizontal_container::{HorizontalContainer, horizontal};
 
 mod fixed_size_container;
 pub use fixed_size_container::FixedSizeContainer;

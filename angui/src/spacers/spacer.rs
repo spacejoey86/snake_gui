@@ -14,7 +14,7 @@ impl VerticalSpacer {
     }
 }
 
-impl<T> ElementFixedSizeTrait<T> for VerticalSpacer {
+impl<BackendContext> ElementFixedSizeTrait<BackendContext, ()> for VerticalSpacer {
     fn width(&self) -> usize {
         0
     }
@@ -23,7 +23,7 @@ impl<T> ElementFixedSizeTrait<T> for VerticalSpacer {
         self.height
     }
 
-    fn render(&self, _ctx: &mut T, _top_left: Position) {}
+    fn render(self: Box<Self>, _ctx: &mut BackendContext, _top_left: Position) {}
 }
 
 /// Spacer that takes up a specified horizontal space.
@@ -34,7 +34,7 @@ pub struct HorizontalSpacer<BackendContext> {
 }
 
 impl<BackendContext: 'static> HorizontalSpacer<BackendContext> {
-    pub fn new(width: usize) -> ElementFixedSize<BackendContext> {
+    pub fn new(width: usize) -> ElementFixedSize<BackendContext, ()> {
         ElementFixedSize {
             inner: Box::new(Self {
                 width,
@@ -44,7 +44,9 @@ impl<BackendContext: 'static> HorizontalSpacer<BackendContext> {
     }
 }
 
-impl<BackendContext> ElementFixedSizeTrait<BackendContext> for HorizontalSpacer<BackendContext> {
+impl<BackendContext> ElementFixedSizeTrait<BackendContext, ()>
+    for HorizontalSpacer<BackendContext>
+{
     fn width(&self) -> usize {
         self.width
     }
@@ -53,5 +55,5 @@ impl<BackendContext> ElementFixedSizeTrait<BackendContext> for HorizontalSpacer<
         0
     }
 
-    fn render(&self, _ctx: &mut BackendContext, _top_left: Position) {}
+    fn render(self: Box<Self>, _ctx: &mut BackendContext, _top_left: Position) {}
 }

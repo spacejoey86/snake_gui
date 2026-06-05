@@ -2,7 +2,7 @@ use terminal_backend::{CharRectangle, PrintBackendCTX};
 
 use angui::{
     Position,
-    pure_containers::{HorizontalContainer, PaddingContainer},
+    pure_containers::{PaddingContainer, horizontal},
     spacers::HorizontalSpacer,
     visual_containers::BorderContainer,
     widgets::{Label, VerticalSeparator},
@@ -10,13 +10,19 @@ use angui::{
 
 fn main() {
     let root = BorderContainer::new(
-        HorizontalContainer::new(1)
-            .add_child(CharRectangle::new(30, 10, 'a'))
-            .add_child(VerticalSeparator::new())
-            .add_child(PaddingContainer::all(Label::new("Test label"), 1))
-            .add_child(CharRectangle::new(5, 15, 'b'))
-            .add_child(HorizontalSpacer::new(1))
-            .add_child(CharRectangle::new(3, 3, 'c'))
+        horizontal(
+            1,
+            CharRectangle::new(30, 10, 'a'),
+            VerticalSeparator::new(),
+            |_, _| (),
+        )
+        .add_child(
+            PaddingContainer::all(Label::new("Test label"), 1),
+            |_, _| (),
+        )
+        .add_child(CharRectangle::new(5, 15, 'b'), |_, _| ())
+        .add_child(HorizontalSpacer::new(1), |_, _| ())
+        .add_child(CharRectangle::new(3, 3, 'c'), |_, _| ()),
     );
 
     let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents

@@ -1,6 +1,6 @@
 use angui::{
     ElementFixedSizeTrait, Position,
-    pure_containers::{HorizontalContainer, PaddingContainer},
+    pure_containers::{PaddingContainer, horizontal},
     widgets::{Button, Label, RectangleElement},
 };
 use glfw::{Action, Context, Key, MouseButton, fail_on_errors};
@@ -54,12 +54,20 @@ fn main() {
         }
 
         ctx.clear();
-        HorizontalContainer::new(10)
-            .add_child(RectangleElement::new(20, 50, 7))
-            .add_child(RectangleElement::new(50, 200, 1))
-            .add_child(Button::new(mouse_down))
-            .add_child(PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4))
-            .render(&mut ctx, Position::new(0, 0));
+        Box::new(
+            horizontal(
+                10,
+                RectangleElement::new(20, 50, 7),
+                RectangleElement::new(50, 200, 1),
+                |_, _| (),
+            )
+            .add_child(Button::new(mouse_down), |_, _| ())
+            .add_child(
+                PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),
+                |_, _| (),
+            ),
+        )
+        .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 
         window.swap_buffers();

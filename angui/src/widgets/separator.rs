@@ -9,9 +9,9 @@ pub struct VerticalSeparator<BackendContext> {
 
 impl<BackendContext: 'static> VerticalSeparator<BackendContext>
 where
-    VerticalSeparator<BackendContext>: ElementFixedWidthGrowingHeightTrait<BackendContext>,
+    VerticalSeparator<BackendContext>: ElementFixedWidthGrowingHeightTrait<BackendContext, ()>,
 {
-    pub fn new() -> ElementFixedWidthGrowingHeight<BackendContext> {
+    pub fn new() -> ElementFixedWidthGrowingHeight<BackendContext, ()> {
         ElementFixedWidthGrowingHeight {
             inner: Box::new(Self {
                 phantom: PhantomData,

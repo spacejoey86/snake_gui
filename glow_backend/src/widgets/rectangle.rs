@@ -1,7 +1,7 @@
 use crate::{GlowBackendContext, Rect};
 use angui::{ElementFixedSizeTrait, Position, widgets::RectangleElement};
 
-impl ElementFixedSizeTrait<GlowBackendContext> for RectangleElement<GlowBackendContext> {
+impl ElementFixedSizeTrait<GlowBackendContext, ()> for RectangleElement<GlowBackendContext> {
     fn width(&self) -> usize {
         self.width
     }
@@ -10,7 +10,7 @@ impl ElementFixedSizeTrait<GlowBackendContext> for RectangleElement<GlowBackendC
         self.height
     }
 
-    fn render(&self, ctx: &mut GlowBackendContext, top_left: Position) {
+    fn render(self: Box<Self>, ctx: &mut GlowBackendContext, top_left: Position) {
         ctx.rects.push(Rect {
             offset_x: (top_left.x as f32 * 2.0) / ctx.window_width as f32 - 1.0,
             offset_y: (top_left.y as f32 * 2.0) / ctx.window_height as f32 - 1.0,

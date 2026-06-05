@@ -8,4 +8,4 @@ mod separator;
 pub use separator::VerticalSeparator;
 
 mod button;
-pub use button::Button;
+pub use button::{Button, ButtonResult};

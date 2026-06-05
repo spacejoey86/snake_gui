@@ -6,63 +6,93 @@ use crate::{
 /// Place elements one after the other horizontally.
 /// Adds spacing between elements.
 /// Allows element's height to grow to match the tallest element.
-pub struct HorizontalContainer<BackendContext> {
-    children: Vec<ElementFixedWidthGrowingHeight<BackendContext>>,
+pub struct HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
+    left: ElementFixedWidthGrowingHeight<BackendContext, LeftUserState>,
+    right: ElementFixedWidthGrowingHeight<BackendContext, RightUserState>,
+    state_closure: Box<dyn FnOnce(LeftUserState, RightUserState) -> UserState>,
     spacing: usize,
 }
 
-impl<BackendContext> ElementFixedSizeTrait<BackendContext> for HorizontalContainer<BackendContext> {
+impl<BackendContext, LeftUserState, RightUserState, UserState>
+    ElementFixedSizeTrait<BackendContext, UserState>
+    for HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState>
+{
     fn width(&self) -> usize {
-        let spacing = if self.children.len() == 1 {
-            0
-        } else {
-            self.spacing * self.children.len()
-        };
-        spacing
-            + self
-                .children
-                .iter()
-                .map(|child| child.width())
-                .sum::<usize>()
+        self.left.width() + self.spacing + self.right.width()
     }
 
     fn height(&self) -> usize {
-        self.children
-            .iter()
-            .map(|child| child.min_height())
-            .max()
-            .unwrap_or(0)
+        self.left.min_height().max(self.right.min_height())
     }
 
-    fn render(&self, ctx: &mut BackendContext, top_left: Position) {
-        let mut x_offset = 0;
+    fn render(self: Box<Self>, ctx: &mut BackendContext, top_left: Position) -> UserState {
+        let right_offset = self.left.width() + self.spacing;
         let height = self.height();
-        for child in self.children.iter() {
-            child.render(ctx, top_left + Position::new(x_offset, 0), height);
-            x_offset += child.width() + self.spacing
-        }
+        let l = self.left.render(ctx, top_left, height);
+        let r = self
+            .right
+            .render(ctx, top_left + Position::new(right_offset, 0), height);
+
+        (self.state_closure)(l, r)
     }
 }
 
-impl<BackendContext: 'static> HorizontalContainer<BackendContext> {
-    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext>>>(
-        mut self,
+impl<
+    BackendContext: 'static,
+    InnerLeftUserState: 'static,
+    InnerRightUserState: 'static,
+    LeftUserState: 'static,
+> HorizontalContainer<BackendContext, InnerLeftUserState, InnerRightUserState, LeftUserState>
+{
+    pub fn add_child<
+        T: Into<ElementFixedWidthGrowingHeight<BackendContext, RightUserState>>,
+        F: FnOnce(LeftUserState, RightUserState) -> UserState + 'static,
+        RightUserState,
+        UserState,
+    >(
+        self,
         child: T,
-    ) -> Self {
-        self.children.push(child.into());
-        return self;
-    }
-
-    pub fn new(spacing: usize) -> Self {
-        Self {
-            children: vec![],
+        state_closure: F,
+    ) -> HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
+        let spacing = self.spacing;
+        HorizontalContainer {
+            left: Into::<ElementFixedSize<BackendContext, LeftUserState>>::into(self).into(),
+            right: child.into(),
+            state_closure: Box::new(state_closure),
             spacing,
         }
     }
 }
 
-impl<BackendContext: 'static> Into<ElementFixedSize<BackendContext>> for HorizontalContainer<BackendContext> {
-    fn into(self) -> ElementFixedSize<BackendContext> {
-        ElementFixedSize { inner: Box::new(self) }
+impl<BackendContext: 'static, LeftUserState: 'static, RightUserState: 'static, UserState: 'static>
+    Into<ElementFixedSize<BackendContext, UserState>>
+    for HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState>
+{
+    fn into(self) -> ElementFixedSize<BackendContext, UserState> {
+        ElementFixedSize {
+            inner: Box::new(self),
+        }
+    }
+}
+
+pub fn horizontal<
+    BackendContext,
+    L: Into<ElementFixedWidthGrowingHeight<BackendContext, LeftUserState>>,
+    R: Into<ElementFixedWidthGrowingHeight<BackendContext, RightUserState>>,
+    F: FnOnce(LeftUserState, RightUserState) -> UserState + 'static,
+    LeftUserState,
+    RightUserState,
+    UserState,
+>(
+    spacing: usize,
+    left: L,
+    right: R,
+    state_closure: F,
+) -> HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
+    HorizontalContainer {
+        left: left.into(),
+        right: right.into(),
+        state_closure: Box::new(state_closure),
+        spacing,
     }
 }

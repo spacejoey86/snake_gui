@@ -1,7 +1,9 @@
 use crate::PrintBackendCTX;
 use angui::{ElementFixedSizeTrait, Position, visual_containers::BorderContainer};
 
-impl ElementFixedSizeTrait<PrintBackendCTX> for BorderContainer<PrintBackendCTX> {
+impl<UserState> ElementFixedSizeTrait<PrintBackendCTX, UserState>
+    for BorderContainer<PrintBackendCTX, UserState>
+{
     fn width(&self) -> usize {
         self.child.width() + 2
     }
@@ -10,7 +12,7 @@ impl ElementFixedSizeTrait<PrintBackendCTX> for BorderContainer<PrintBackendCTX>
         self.child.height() + 2
     }
 
-    fn render(&self, ctx: &mut PrintBackendCTX, top_left: Position) {
+    fn render(self: Box<Self>, ctx: &mut PrintBackendCTX, top_left: Position) -> UserState {
         // top and bottom borders
         for x in 0..(self.child.width()) {
             let x_absolute = top_left.x + x + 1;
@@ -29,6 +31,6 @@ impl ElementFixedSizeTrait<PrintBackendCTX> for BorderContainer<PrintBackendCTX>
         ctx.buffer[0][self.child.width() + 1] = '╮';
         ctx.buffer[self.child.height() + 1][self.child.width() + 1] = '╯';
         // child
-        self.child.render(ctx, top_left + Position::new(1, 1));
+        self.child.render(ctx, top_left + Position::new(1, 1))
     }
 }
