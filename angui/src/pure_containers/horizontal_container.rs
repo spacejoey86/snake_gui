@@ -6,16 +6,39 @@ use crate::{
 /// Place elements one after the other horizontally.
 /// Adds spacing between elements.
 /// Allows element's height to grow to match the tallest element.
-pub struct HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
-    left: ElementFixedWidthGrowingHeight<BackendContext, LeftUserState>,
-    right: ElementFixedWidthGrowingHeight<BackendContext, RightUserState>,
-    state_closure: Box<dyn FnOnce(LeftUserState, RightUserState) -> UserState>,
+pub struct HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState> {
+    left: ElementFixedWidthGrowingHeight<'a, BackendContext, LeftUserState>,
+    right: ElementFixedWidthGrowingHeight<'a, BackendContext, RightUserState>,
+    state_closure: Box<dyn 'a + FnOnce(LeftUserState, RightUserState) -> UserState>,
     spacing: usize,
 }
 
-impl<BackendContext, LeftUserState, RightUserState, UserState>
-    ElementFixedSizeTrait<BackendContext, UserState>
-    for HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState>
+impl<'a, BackendContext, LeftUserState, RightUserState, UserState>
+    HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState>
+{
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<HorizontalContainer<'b, BackendContext, LeftUserState, RightUserState, UserState>>
+    where
+        'a: 'b,
+    {
+        Box::new(HorizontalContainer {
+            left: self.left.covariant(),
+            right: self.right.covariant(),
+            state_closure: self.state_closure,
+            spacing: self.spacing,
+        })
+    }
+}
+
+impl<
+    'a,
+    BackendContext: 'static,
+    LeftUserState: 'static,
+    RightUserState: 'static,
+    UserState: 'static,
+> ElementFixedSizeTrait<'a, BackendContext, UserState>
+    for HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState>
 {
     fn width(&self) -> usize {
         self.left.width() + self.spacing + self.right.width()
@@ -35,25 +58,35 @@ impl<BackendContext, LeftUserState, RightUserState, UserState>
 
         (self.state_closure)(l, r)
     }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b,
+    {
+        self.covariant_box()
+    }
 }
 
 impl<
+    'a,
     BackendContext: 'static,
     InnerLeftUserState: 'static,
     InnerRightUserState: 'static,
     LeftUserState: 'static,
-> HorizontalContainer<BackendContext, InnerLeftUserState, InnerRightUserState, LeftUserState>
+> HorizontalContainer<'a, BackendContext, InnerLeftUserState, InnerRightUserState, LeftUserState>
 {
     pub fn add_child<
-        T: Into<ElementFixedWidthGrowingHeight<BackendContext, RightUserState>>,
-        F: FnOnce(LeftUserState, RightUserState) -> UserState + 'static,
+        T: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, RightUserState>>,
+        F: FnOnce(LeftUserState, RightUserState) -> UserState + 'a,
         RightUserState,
         UserState,
     >(
         self,
         child: T,
         state_closure: F,
-    ) -> HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
+    ) -> HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState> {
         let spacing = self.spacing;
         HorizontalContainer {
             left: Into::<ElementFixedSize<BackendContext, LeftUserState>>::into(self).into(),
@@ -64,22 +97,28 @@ impl<
     }
 }
 
-impl<BackendContext: 'static, LeftUserState: 'static, RightUserState: 'static, UserState: 'static>
-    Into<ElementFixedSize<BackendContext, UserState>>
-    for HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState>
+impl<
+    'a,
+    BackendContext: 'static,
+    LeftUserState: 'static,
+    RightUserState: 'static,
+    UserState: 'static,
+> Into<ElementFixedSize<'a, BackendContext, UserState>>
+    for HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState>
 {
-    fn into(self) -> ElementFixedSize<BackendContext, UserState> {
+    fn into(self) -> ElementFixedSize<'a, BackendContext, UserState> {
         ElementFixedSize {
-            inner: Box::new(self),
+            inner: Box::new(self).covariant_box(),
         }
     }
 }
 
 pub fn horizontal<
+    'a,
     BackendContext,
-    L: Into<ElementFixedWidthGrowingHeight<BackendContext, LeftUserState>>,
-    R: Into<ElementFixedWidthGrowingHeight<BackendContext, RightUserState>>,
-    F: FnOnce(LeftUserState, RightUserState) -> UserState + 'static,
+    L: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, LeftUserState>>,
+    R: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, RightUserState>>,
+    F: FnOnce(LeftUserState, RightUserState) -> UserState + 'a,
     LeftUserState,
     RightUserState,
     UserState,
@@ -88,7 +127,7 @@ pub fn horizontal<
     left: L,
     right: R,
     state_closure: F,
-) -> HorizontalContainer<BackendContext, LeftUserState, RightUserState, UserState> {
+) -> HorizontalContainer<'a, BackendContext, LeftUserState, RightUserState, UserState> {
     HorizontalContainer {
         left: left.into(),
         right: right.into(),

@@ -7,11 +7,11 @@ pub struct VerticalSeparator<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static> VerticalSeparator<BackendContext>
+impl<'a, BackendContext: 'static> VerticalSeparator<BackendContext>
 where
-    VerticalSeparator<BackendContext>: ElementFixedWidthGrowingHeightTrait<BackendContext, ()>,
+    VerticalSeparator<BackendContext>: ElementFixedWidthGrowingHeightTrait<'a, BackendContext, ()>,
 {
-    pub fn new() -> ElementFixedWidthGrowingHeight<BackendContext, ()> {
+    pub fn new() -> ElementFixedWidthGrowingHeight<'a, BackendContext, ()> {
         ElementFixedWidthGrowingHeight {
             inner: Box::new(Self {
                 phantom: PhantomData,

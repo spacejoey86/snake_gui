@@ -10,6 +10,16 @@ impl Position {
     pub fn new(x: usize, y: usize) -> Self {
         Self { x, y }
     }
+
+    /// if self is the top left of a rectangle, could other be in the box
+    pub fn inside_top_left(&self, other: Position) -> bool {
+        self.x < other.x && self.y < other.y
+    }
+
+    /// if self is the bottom left of a rectangle, could other be in the box
+    pub fn inside_bottom_right(&self, other: Position) -> bool {
+        self.x > other.x && self.y > other.y
+    }
 }
 
 impl Add for Position {

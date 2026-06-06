@@ -1,7 +1,9 @@
 use crate::{GlowBackendContext, Rect};
 use angui::{ElementFixedSizeTrait, Position, widgets::RectangleElement};
 
-impl ElementFixedSizeTrait<GlowBackendContext, ()> for RectangleElement<GlowBackendContext> {
+impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ()>
+    for RectangleElement<GlowBackendContext>
+{
     fn width(&self) -> usize {
         self.width
     }
@@ -20,5 +22,14 @@ impl ElementFixedSizeTrait<GlowBackendContext, ()> for RectangleElement<GlowBack
             texture_offset_x: 0.0, // use the first character, which is fully opaque (no texture)
             texture_offset_y: 0.0,
         })
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, GlowBackendContext, ()> + 'b>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

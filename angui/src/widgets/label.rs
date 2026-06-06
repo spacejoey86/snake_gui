@@ -8,11 +8,11 @@ pub struct Label<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static> Label<BackendContext>
+impl<'a, BackendContext: 'static> Label<BackendContext>
 where
-    Label<BackendContext>: ElementFixedSizeTrait<BackendContext, ()>,
+    Label<BackendContext>: ElementFixedSizeTrait<'a, BackendContext, ()>,
 {
-    pub fn new(text: &str) -> ElementFixedSize<BackendContext, ()> {
+    pub fn new(text: &str) -> ElementFixedSize<'a, BackendContext, ()> {
         ElementFixedSize {
             inner: Box::new(Self {
                 text: text.to_string(),

@@ -3,7 +3,7 @@ use angui::{
     pure_containers::{PaddingContainer, horizontal},
     widgets::{Button, Label, RectangleElement},
 };
-use glfw::{Action, Context, Key, MouseButton, fail_on_errors};
+use glfw::{Action, Context, Key, MouseButton::Button1, fail_on_errors};
 use glow_backend::GlowBackendContext;
 
 fn main() {
@@ -26,7 +26,8 @@ fn main() {
         window.get_size().1 as u32,
     );
 
-    let mut mouse_down = false;
+    let mut button_down = false;
+    let mut second_button_down = false;
 
     // Run the app:
     while !window.should_close() {
@@ -40,20 +41,21 @@ fn main() {
                 glfw::WindowEvent::FramebufferSize(width, height) => {
                     ctx.set_window_size(width as u32, height as u32);
                 }
-                glfw::WindowEvent::MouseButton(MouseButton::Left, action, _) => match action {
-                    Action::Press => {
-                        mouse_down = true;
-                    }
-                    Action::Release => {
-                        mouse_down = false;
-                    }
-                    _ => {}
-                },
                 _ => {}
             }
         }
 
         ctx.clear();
+
+        let mouse_pos = window.get_cursor_pos();
+        ctx.set_mouse(
+            match window.get_mouse_button(Button1) {
+                Action::Press => true,
+                _ => false,
+            },
+            Position::new(mouse_pos.0.floor() as usize, mouse_pos.1.floor() as usize),
+        );
+
         Box::new(
             horizontal(
                 10,
@@ -61,7 +63,15 @@ fn main() {
                 RectangleElement::new(50, 200, 1),
                 |_, _| (),
             )
-            .add_child(Button::new(mouse_down), |_, _| ())
+            .add_child(Button::new(button_down), |_, button_result| {
+                button_down = button_result.held;
+            })
+            .add_child(Button::new(second_button_down), |_, res| {
+                if res.clicked {
+                    println!("clicked second button")
+                }
+                second_button_down = res.held
+            })
             .add_child(
                 PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),
                 |_, _| (),

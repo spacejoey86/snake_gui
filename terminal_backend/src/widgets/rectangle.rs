@@ -2,7 +2,7 @@ use angui::{ElementFixedSizeTrait, Position, widgets::RectangleElement};
 
 use crate::PrintBackendCTX;
 
-impl ElementFixedSizeTrait<PrintBackendCTX, ()> for RectangleElement<PrintBackendCTX> {
+impl<'a> ElementFixedSizeTrait<'a, PrintBackendCTX, ()> for RectangleElement<PrintBackendCTX> {
     fn width(&self) -> usize {
         self.width
     }
@@ -17,5 +17,14 @@ impl ElementFixedSizeTrait<PrintBackendCTX, ()> for RectangleElement<PrintBacken
                 ctx.buffer[top_left.y + row][top_left.x + column] = '█';
             }
         }
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, PrintBackendCTX, ()> + 'b>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

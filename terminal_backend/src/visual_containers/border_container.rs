@@ -1,8 +1,8 @@
 use crate::PrintBackendCTX;
 use angui::{ElementFixedSizeTrait, Position, visual_containers::BorderContainer};
 
-impl<UserState> ElementFixedSizeTrait<PrintBackendCTX, UserState>
-    for BorderContainer<PrintBackendCTX, UserState>
+impl<'a, UserState: 'static> ElementFixedSizeTrait<'a, PrintBackendCTX, UserState>
+    for BorderContainer<'a, PrintBackendCTX, UserState>
 {
     fn width(&self) -> usize {
         self.child.width() + 2
@@ -32,5 +32,16 @@ impl<UserState> ElementFixedSizeTrait<PrintBackendCTX, UserState>
         ctx.buffer[self.child.height() + 1][self.child.width() + 1] = '╯';
         // child
         self.child.render(ctx, top_left + Position::new(1, 1))
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, PrintBackendCTX, UserState> + 'b>
+    where
+        'a: 'b,
+    {
+        Box::new(BorderContainer {
+            child: self.child.covariant(),
+        })
     }
 }

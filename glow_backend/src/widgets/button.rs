@@ -5,7 +5,7 @@ use angui::{
 
 use crate::GlowBackendContext;
 
-impl ElementFixedSizeTrait<GlowBackendContext, ButtonResult> for Button<GlowBackendContext> {
+impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult> for Button<GlowBackendContext> {
     fn width(&self) -> usize {
         50
     }
@@ -32,6 +32,29 @@ impl ElementFixedSizeTrait<GlowBackendContext, ButtonResult> for Button<GlowBack
         RectangleElement::new(43, 23, 6)
             .render(ctx, top_left + Position::new(2, 2) + mouse_down_offset);
 
-        ButtonResult { clicked: false, held: false } //todo: return correct values
+        // is the cursor over this element?
+        if top_left.inside_top_left(ctx.mouse_pos)
+            && (top_left + Position::new(50, 30)).inside_bottom_right(ctx.mouse_pos)
+        {
+            ctx.mouse_swallowed = true;
+            ButtonResult {
+                clicked: ctx.mouse_clicked,
+                held: ctx.mouse_down,
+            }
+        } else {
+            ButtonResult {
+                clicked: false,
+                held: false,
+            }
+        }
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, GlowBackendContext, ButtonResult>>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

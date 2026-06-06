@@ -9,15 +9,15 @@ pub struct RectangleElement<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static> RectangleElement<BackendContext>
+impl<'a, BackendContext: 'static> RectangleElement<BackendContext>
 where
-    RectangleElement<BackendContext>: ElementFixedSizeTrait<BackendContext, ()>,
+    RectangleElement<BackendContext>: ElementFixedSizeTrait<'a, BackendContext, ()>,
 {
     pub fn new(
         width: usize,
         height: usize,
         colour_index: u8,
-    ) -> ElementFixedSize<BackendContext, ()> {
+    ) -> ElementFixedSize<'a, BackendContext, ()> {
         ElementFixedSize {
             inner: Box::new(Self {
                 width,

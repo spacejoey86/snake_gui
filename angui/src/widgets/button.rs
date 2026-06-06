@@ -7,11 +7,11 @@ pub struct Button<BackendContext> {
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static> Button<BackendContext>
+impl<'a, BackendContext: 'static> Button<BackendContext>
 where
-    Button<BackendContext>: ElementFixedSizeTrait<BackendContext, ButtonResult>,
+    Button<BackendContext>: ElementFixedSizeTrait<'a, BackendContext, ButtonResult>,
 {
-    pub fn new(down: bool) -> ElementFixedSize<BackendContext, ButtonResult> {
+    pub fn new(down: bool) -> ElementFixedSize<'a, BackendContext, ButtonResult> {
         ElementFixedSize {
             inner: Box::new(Self {
                 down,

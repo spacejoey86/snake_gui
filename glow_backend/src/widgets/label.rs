@@ -2,7 +2,7 @@ use angui::{ElementFixedSizeTrait, widgets::Label};
 
 use crate::{FONT_CHARS, FONT_NUM_CHARACTERS, GlowBackendContext, Rect, font_data};
 
-impl ElementFixedSizeTrait<GlowBackendContext, ()> for Label<GlowBackendContext> {
+impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ()> for Label<GlowBackendContext> {
     fn width(&self) -> usize {
         font_data().1 as usize / FONT_NUM_CHARACTERS * self.text.len()
     }
@@ -37,5 +37,14 @@ impl ElementFixedSizeTrait<GlowBackendContext, ()> for Label<GlowBackendContext>
             x_offset += 1;
             // todo: add spacing between characters
         }
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, GlowBackendContext, ()> + 'b>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

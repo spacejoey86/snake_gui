@@ -4,19 +4,24 @@
 use crate::position::Position;
 
 /// Fixed size UI element
-pub trait ElementFixedSizeTrait<BackendContext, UserState> {
+pub trait ElementFixedSizeTrait<'a, BackendContext, UserState> {
     fn width(&self) -> usize;
     fn height(&self) -> usize;
     /// Some backends might require an additional call before you see the element on your screen
     fn render(self: Box<Self>, ctx: &mut BackendContext, top_left: Position) -> UserState;
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b;
 }
 
 /// wrapper around the trait, for containers to erase generics of children
-pub struct ElementFixedSize<BackendContext, UserState> {
-    pub inner: Box<dyn ElementFixedSizeTrait<BackendContext, UserState>>,
+pub struct ElementFixedSize<'a, BackendContext, UserState> {
+    pub inner: Box<dyn ElementFixedSizeTrait<'a, BackendContext, UserState> + 'a>,
 }
 
-impl<BackendContext, UserState> ElementFixedSize<BackendContext, UserState> {
+impl<'a, BackendContext, UserState> ElementFixedSize<'a, BackendContext, UserState> {
     pub fn width(&self) -> usize {
         self.inner.width()
     }
@@ -28,11 +33,28 @@ impl<BackendContext, UserState> ElementFixedSize<BackendContext, UserState> {
     pub fn render(self, ctx: &mut BackendContext, top_left: Position) -> UserState {
         self.inner.render(ctx, top_left)
     }
+
+    pub fn covariant<'b>(self) -> ElementFixedSize<'b, BackendContext, UserState>
+    where
+        'a: 'b,
+    {
+        ElementFixedSize {
+            inner: self.inner.covariant_box(),
+        }
+    }
+
+    fn covariant_box<'b>(self: Box<Self>) -> Box<ElementFixedSize<'b, BackendContext, UserState>>
+    where
+        'a: 'b,
+    {
+        Box::new(ElementFixedSize::covariant(*self))
+    }
 }
 
 // You can use a fixed width UI element as a growable width element
-impl<BackendContext, UserState> ElementGrowingWidthFixedHeightTrait<BackendContext, UserState>
-    for ElementFixedSize<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    ElementGrowingWidthFixedHeightTrait<'a, BackendContext, UserState>
+    for ElementFixedSize<'a, BackendContext, UserState>
 {
     fn min_width(&self) -> usize {
         self.width()
@@ -50,20 +72,33 @@ impl<BackendContext, UserState> ElementGrowingWidthFixedHeightTrait<BackendConte
     ) -> UserState {
         ElementFixedSize::render(*self, ctx, top_left)
     }
+
+    fn covariant<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementGrowingWidthFixedHeightTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b,
+    {
+        ElementFixedSize::covariant_box::<'b>(self)
+    }
 }
-impl<BackendContext: 'static, UserState: 'static> From<ElementFixedSize<BackendContext, UserState>>
-    for ElementGrowingWidthFixedHeight<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    From<ElementFixedSize<'a, BackendContext, UserState>>
+    for ElementGrowingWidthFixedHeight<'a, BackendContext, UserState>
 {
-    fn from(value: ElementFixedSize<BackendContext, UserState>) -> Self {
+    fn from(value: ElementFixedSize<'a, BackendContext, UserState>) -> Self {
         ElementGrowingWidthFixedHeight {
-            inner: Box::new(value),
+            inner: ElementGrowingWidthFixedHeightTrait::covariant::<'a>(
+                Box::new(value).covariant_box::<'a>(),
+            ),
         }
     }
 }
 
 // You can use a fixed height UI element as a growable height element
-impl<BackendContext, UserState> ElementFixedWidthGrowingHeightTrait<BackendContext, UserState>
-    for ElementFixedSize<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    ElementFixedWidthGrowingHeightTrait<'a, BackendContext, UserState>
+    for ElementFixedSize<'a, BackendContext, UserState>
 {
     fn width(&self) -> usize {
         self.width()
@@ -81,13 +116,23 @@ impl<BackendContext, UserState> ElementFixedWidthGrowingHeightTrait<BackendConte
     ) -> UserState {
         ElementFixedSize::render(*self, ctx, top_left)
     }
+
+    fn covariant<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedWidthGrowingHeightTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b,
+    {
+        ElementFixedSize::covariant_box::<'b>(self)
+    }
 }
-impl<BackendContext: 'static, UserState: 'static> From<ElementFixedSize<BackendContext, UserState>>
-    for ElementFixedWidthGrowingHeight<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    From<ElementFixedSize<'a, BackendContext, UserState>>
+    for ElementFixedWidthGrowingHeight<'a, BackendContext, UserState>
 {
-    fn from(value: ElementFixedSize<BackendContext, UserState>) -> Self {
+    fn from(value: ElementFixedSize<'a, BackendContext, UserState>) -> Self {
         ElementFixedWidthGrowingHeight {
-            inner: Box::new(value),
+            inner: ElementFixedWidthGrowingHeightTrait::covariant(Box::new(value)),
         }
     }
 }
@@ -101,7 +146,7 @@ impl<BackendContext: 'static, UserState: 'static> From<ElementFixedSize<BackendC
 //     }
 // }
 
-pub trait ElementGrowingWidthFixedHeightTrait<BackendContext, UserState> {
+pub trait ElementGrowingWidthFixedHeightTrait<'a, BackendContext, UserState> {
     fn min_width(&self) -> usize;
     fn height(&self) -> usize;
     fn render(
@@ -110,14 +155,19 @@ pub trait ElementGrowingWidthFixedHeightTrait<BackendContext, UserState> {
         top_left: Position,
         width: usize,
     ) -> UserState;
+    fn covariant<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementGrowingWidthFixedHeightTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b;
 }
 
 /// wrapper around the trait, to erase generics
-pub struct ElementGrowingWidthFixedHeight<BackendContext, UserState> {
-    pub inner: Box<dyn ElementGrowingWidthFixedHeightTrait<BackendContext, UserState>>,
+pub struct ElementGrowingWidthFixedHeight<'a, BackendContext, UserState> {
+    pub inner: Box<dyn ElementGrowingWidthFixedHeightTrait<'a, BackendContext, UserState> + 'a>,
 }
 
-impl<BackendContext, UserState> ElementGrowingWidthFixedHeight<BackendContext, UserState> {
+impl<'a, BackendContext, UserState> ElementGrowingWidthFixedHeight<'a, BackendContext, UserState> {
     pub fn min_width(&self) -> usize {
         self.inner.min_width()
     }
@@ -141,7 +191,7 @@ impl<BackendContext, UserState> ElementGrowingWidthFixedHeight<BackendContext, U
 // }
 
 /// Render a UI element with a fixed width, growable height
-pub trait ElementFixedWidthGrowingHeightTrait<BackendContext, UserState> {
+pub trait ElementFixedWidthGrowingHeightTrait<'a, BackendContext, UserState> {
     fn width(&self) -> usize;
     fn min_height(&self) -> usize;
     fn render(
@@ -150,14 +200,19 @@ pub trait ElementFixedWidthGrowingHeightTrait<BackendContext, UserState> {
         top_left: Position,
         height: usize,
     ) -> UserState;
+    fn covariant<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedWidthGrowingHeightTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b;
 }
 
 /// wrapper to erase generics
-pub struct ElementFixedWidthGrowingHeight<BackendContext, UserState> {
-    pub inner: Box<dyn ElementFixedWidthGrowingHeightTrait<BackendContext, UserState>>,
+pub struct ElementFixedWidthGrowingHeight<'a, BackendContext, UserState> {
+    pub inner: Box<dyn ElementFixedWidthGrowingHeightTrait<'a, BackendContext, UserState> + 'a>,
 }
 
-impl<BackendContext, UserState> ElementFixedWidthGrowingHeight<BackendContext, UserState> {
+impl<'a, BackendContext, UserState> ElementFixedWidthGrowingHeight<'a, BackendContext, UserState> {
     pub fn width(&self) -> usize {
         self.inner.width()
     }
@@ -166,6 +221,15 @@ impl<BackendContext, UserState> ElementFixedWidthGrowingHeight<BackendContext, U
     }
     pub fn render(self, ctx: &mut BackendContext, top_left: Position, height: usize) -> UserState {
         self.inner.render(ctx, top_left, height)
+    }
+
+    pub fn covariant<'b>(self) -> ElementFixedWidthGrowingHeight<'b, BackendContext, UserState>
+    where
+        'a: 'b,
+    {
+        ElementFixedWidthGrowingHeight {
+            inner: self.inner.covariant(),
+        }
     }
 }
 

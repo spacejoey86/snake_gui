@@ -10,16 +10,16 @@ use crate::{
 /// Adds h_spacing between elements, and v_spacing between rows.
 /// Allows element's height to grow to match the talles element in their row.
 /// Width of this container is the width of the widest row - this might be smaller than wrap_width
-pub struct HorizontalWrappingContainer<BackendContext, UserState> {
-    children: Vec<Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>>,
+pub struct HorizontalWrappingContainer<'a, BackendContext, UserState> {
+    children: Vec<Vec<ElementFixedWidthGrowingHeight<'a, BackendContext, UserState>>>,
     h_spacing: usize,
     v_spacing: usize,
     wrap_width: usize,
     phantom: PhantomData<BackendContext>,
 }
 
-impl<BackendContext: 'static, UserState: 'static>
-    HorizontalWrappingContainer<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    HorizontalWrappingContainer<'a, BackendContext, UserState>
 {
     pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Self {
         Self {
@@ -32,13 +32,13 @@ impl<BackendContext: 'static, UserState: 'static>
     }
 
     // todo: replace with into
-    pub fn build(self) -> ElementFixedSize<BackendContext, UserState> {
+    pub fn build(self) -> ElementFixedSize<'a, BackendContext, UserState> {
         ElementFixedSize {
-            inner: Box::new(self),
+            inner: Box::new(self).covariant_box(),
         }
     }
 
-    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<BackendContext, UserState>>>(
+    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, UserState>>>(
         mut self,
         child: T,
     ) -> Result<Box<Self>, ()> {
@@ -76,10 +76,28 @@ impl<BackendContext: 'static, UserState: 'static>
             .max()
             .unwrap_or(0)
     }
+
+    fn covariant<'b>(self: Box<Self>) -> HorizontalWrappingContainer<'b, BackendContext, UserState>
+    where
+        'a: 'b,
+    {
+        HorizontalWrappingContainer {
+            children: self
+                .children
+                .into_iter()
+                .map(|row| row.into_iter().map(|child| child.covariant()).collect())
+                .collect(),
+            h_spacing: self.h_spacing,
+            v_spacing: self.v_spacing,
+            wrap_width: self.wrap_width,
+            phantom: PhantomData,
+        }
+    }
 }
 
-impl<BackendContext: 'static, UserState: 'static> ElementFixedSizeTrait<BackendContext, UserState>
-    for HorizontalWrappingContainer<BackendContext, UserState>
+impl<'a, BackendContext: 'static, UserState: 'static>
+    ElementFixedSizeTrait<'a, BackendContext, UserState>
+    for HorizontalWrappingContainer<'a, BackendContext, UserState>
 {
     fn width(&self) -> usize {
         self.children
@@ -126,5 +144,14 @@ impl<BackendContext: 'static, UserState: 'static> ElementFixedSizeTrait<BackendC
         }
 
         todo!()
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, BackendContext, UserState> + 'b>
+    where
+        'a: 'b,
+    {
+        Box::new(self.covariant())
     }
 }

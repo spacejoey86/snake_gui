@@ -2,7 +2,9 @@ use angui::{ElementFixedWidthGrowingHeightTrait, Position, widgets::VerticalSepa
 
 use crate::PrintBackendCTX;
 
-impl ElementFixedWidthGrowingHeightTrait<PrintBackendCTX, ()> for VerticalSeparator<PrintBackendCTX> {
+impl<'a> ElementFixedWidthGrowingHeightTrait<'a, PrintBackendCTX, ()>
+    for VerticalSeparator<PrintBackendCTX>
+{
     fn width(&self) -> usize {
         1
     }
@@ -15,5 +17,14 @@ impl ElementFixedWidthGrowingHeightTrait<PrintBackendCTX, ()> for VerticalSepara
         for y in 0..height {
             ctx.buffer[top_left.y + y][top_left.x] = '│';
         }
+    }
+
+    fn covariant<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedWidthGrowingHeightTrait<'b, PrintBackendCTX, ()> + 'b>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

@@ -7,8 +7,8 @@ pub struct CharRectangle {
     char: char,
 }
 
-impl CharRectangle {
-    pub fn new(width: usize, height: usize, char: char) -> ElementFixedSize<PrintBackendCTX, ()> {
+impl<'a> CharRectangle {
+    pub fn new(width: usize, height: usize, char: char) -> ElementFixedSize<'a, PrintBackendCTX, ()> {
         ElementFixedSize {
             inner: Box::new(Self {
                 width,
@@ -19,7 +19,7 @@ impl CharRectangle {
     }
 }
 
-impl ElementFixedSizeTrait<PrintBackendCTX, ()> for CharRectangle {
+impl<'a> ElementFixedSizeTrait<'a, PrintBackendCTX, ()> for CharRectangle {
     fn width(&self) -> usize {
         self.width
     }
@@ -34,5 +34,14 @@ impl ElementFixedSizeTrait<PrintBackendCTX, ()> for CharRectangle {
                 ctx.buffer[top_left.y + y][top_left.x + x] = self.char;
             }
         }
+    }
+
+    fn covariant_box<'b>(
+        self: Box<Self>,
+    ) -> Box<dyn ElementFixedSizeTrait<'b, PrintBackendCTX, ()> + 'b>
+    where
+        'a: 'b,
+    {
+        self
     }
 }

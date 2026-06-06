@@ -1,5 +1,6 @@
 mod widgets;
 
+use angui::Position;
 use glow::{Context, HasContext, NativeBuffer};
 
 // general backend architecture
@@ -25,6 +26,13 @@ pub struct GlowBackendContext {
     window_height: u32,
     // colours are picked from a palette
     colour_palette: [Colour; 256],
+
+    mouse_clicked: bool,
+    mouse_down: bool,
+    mouse_pos: Position,
+    /// has some widget already decided they have been interacted with
+    /// aka, a widget infront has been clicked on
+    mouse_swallowed: bool,
 }
 
 #[derive(Copy, Clone)]
@@ -126,7 +134,8 @@ impl GlowBackendContext {
             gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 0, 0);
             // upload the vertices to the gpu
             let vertices: [f32; _] = [0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0];
-            let vertices_u8 = core::slice::from_raw_parts( // actual unsafe call
+            let vertices_u8 = core::slice::from_raw_parts(
+                // actual unsafe call
                 vertices.as_ptr() as *const u8,
                 vertices.len() * core::mem::size_of::<f32>(),
             );
@@ -208,6 +217,10 @@ impl GlowBackendContext {
                 window_height,
                 window_width,
                 colour_palette: default_colour_palette(),
+                mouse_clicked: false,
+                mouse_down: false,
+                mouse_pos: Position::new(0, 0),
+                mouse_swallowed: false,
             }
         }
     }
@@ -270,6 +283,13 @@ impl GlowBackendContext {
         unsafe {
             self.gl.clear(glow::COLOR_BUFFER_BIT);
         }
+    }
+
+    pub fn set_mouse(&mut self, mouse_down: bool, mouse_pos: Position) {
+        self.mouse_clicked = !self.mouse_down && mouse_down;
+        self.mouse_down = mouse_down;
+        self.mouse_pos = mouse_pos;
+        self.mouse_swallowed = false;
     }
 }
 
