@@ -6,15 +6,14 @@ Aims
 
 Current features
 - Terminal backend
+- opengl backend
 - Text widget
 - containers, providing common layouts
 
 What's next?
-- opengl backend
-- state and mouse interactions
 - more widgets
-    - button
     - checkbox
+    - slider
     - etc.
 - more containers
 - better naming
