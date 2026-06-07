@@ -1,6 +1,6 @@
 use angui::{
     ElementFixedSizeTrait, Position,
-    pure_containers::{PaddingContainer, horizontal},
+    pure_containers::{HorizontalContainer, PaddingContainer},
     widgets::{Button, Label, RectangleElement},
 };
 use glfw::{Action, Context, Key, MouseButton::Button1, fail_on_errors};
@@ -57,25 +57,22 @@ fn main() {
         );
 
         Box::new(
-            horizontal(
-                10,
-                RectangleElement::new(20, 50, 7),
-                RectangleElement::new(50, 200, 1),
-                |_, _| (),
-            )
-            .add_child(Button::new(button_down), |_, button_result| {
-                button_down = button_result.held;
-            })
-            .add_child(Button::new(second_button_down), |_, res| {
-                if res.clicked {
-                    println!("clicked second button")
-                }
-                second_button_down = res.held
-            })
-            .add_child(
-                PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),
-                |_, _| (),
-            ),
+            HorizontalContainer::new(10)
+                .add_child(RectangleElement::new(20, 50, 7), |_, _| ())
+                .add_child(RectangleElement::new(50, 200, 1), |_, _| ())
+                .add_child(Button::new(button_down), |_, button_result| {
+                    button_down = button_result.held;
+                })
+                .add_child(Button::new(second_button_down), |_, res| {
+                    if res.clicked {
+                        println!("clicked second button")
+                    }
+                    second_button_down = res.held
+                })
+                .add_child(
+                    PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),
+                    |_, _| (),
+                ),
         )
         .render(&mut ctx, Position::new(0, 0));
         ctx.display();
