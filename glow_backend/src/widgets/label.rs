@@ -1,4 +1,4 @@
-use angui::{ElementFixedSizeTrait, widgets::Label};
+use snake_gui::{ElementFixedSizeTrait, Position, widgets::Label};
 
 use crate::{FONT_CHARS, FONT_NUM_CHARACTERS, GlowBackendContext, Rect, font_data};
 
@@ -11,7 +11,7 @@ impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ()> for Label<GlowBackend
         font_data().2 as usize
     }
 
-    fn render(self: Box<Self>, ctx: &mut GlowBackendContext, top_left: angui::Position) {
+    fn render(self: Box<Self>, ctx: &mut GlowBackendContext, top_left: Position) {
         let mut x_offset = 0;
         let char_width = font_data().1 as usize / FONT_NUM_CHARACTERS;
         let char_height = 16;

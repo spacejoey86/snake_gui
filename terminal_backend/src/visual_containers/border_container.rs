@@ -1,5 +1,5 @@
 use crate::PrintBackendCTX;
-use angui::{ElementFixedSizeTrait, Position, visual_containers::BorderContainer};
+use snake_gui::{ElementFixedSizeTrait, Position, visual_containers::BorderContainer};
 
 impl<'a, UserState: 'static> ElementFixedSizeTrait<'a, PrintBackendCTX, UserState>
     for BorderContainer<'a, PrintBackendCTX, UserState>

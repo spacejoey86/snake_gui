@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-angui = { path = "../angui" }
+snake_gui = { path = "../snake_gui" }
 bmp = "0.5.0"
 glow = "0.17.0"
 

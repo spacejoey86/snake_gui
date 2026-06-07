@@ -1,5 +1,5 @@
 use crate::{GlowBackendContext, Rect};
-use angui::{ElementFixedSizeTrait, Position, widgets::RectangleElement};
+use snake_gui::{ElementFixedSizeTrait, Position, widgets::RectangleElement};
 
 impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ()>
     for RectangleElement<GlowBackendContext>

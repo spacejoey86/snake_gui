@@ -1,4 +1,4 @@
-use angui::{
+use snake_gui::{
     ElementFixedSizeTrait, Position,
     pure_containers::{HorizontalContainer, PaddingContainer},
     widgets::{Button, Label, RectangleElement},
@@ -9,7 +9,7 @@ use glow_backend::GlowBackendContext;
 fn main() {
     let mut glfw = glfw::init(fail_on_errors!()).unwrap();
     let (mut window, events) = glfw
-        .create_window(300, 300, "angui", glfw::WindowMode::Windowed)
+        .create_window(300, 300, "snake gui opengl", glfw::WindowMode::Windowed)
         .expect("Failed to create window");
     window.make_current();
     window.set_key_polling(true);

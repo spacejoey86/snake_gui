@@ -1,5 +1,5 @@
 use crate::PrintBackendCTX;
-use angui::{ElementFixedSize, ElementFixedSizeTrait, Position};
+use snake_gui::{ElementFixedSize, ElementFixedSizeTrait, Position};
 
 pub struct CharRectangle {
     width: usize,

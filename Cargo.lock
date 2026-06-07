@@ -3,10 +3,6 @@
 version = 4
 
 [[package]]
-name = "angui"
-version = "0.1.0"
-
-[[package]]
 name = "bitflags"
 version = "1.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -127,10 +123,10 @@ dependencies = [
 name = "glow_backend"
 version = "0.1.0"
 dependencies = [
- "angui",
  "bmp",
  "glfw",
  "glow",
+ "snake_gui",
 ]
 
 [[package]]
@@ -237,6 +233,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "snake_gui"
+version = "0.1.0"
+
+[[package]]
 name = "syn"
 version = "2.0.117"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -251,7 +251,7 @@ dependencies = [
 name = "terminal_backend"
 version = "0.1.0"
 dependencies = [
- "angui",
+ "snake_gui",
 ]
 
 [[package]]

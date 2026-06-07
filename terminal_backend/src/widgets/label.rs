@@ -1,4 +1,4 @@
-use angui::{ElementFixedSizeTrait, Position, widgets::Label};
+use snake_gui::{ElementFixedSizeTrait, Position, widgets::Label};
 
 use crate::PrintBackendCTX;
 

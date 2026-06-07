@@ -1,6 +1,6 @@
 use terminal_backend::{CharRectangle, PrintBackendCTX};
 
-use angui::{
+use snake_gui::{
     Position,
     pure_containers::{HorizontalContainer, PaddingContainer},
     spacers::HorizontalSpacer,

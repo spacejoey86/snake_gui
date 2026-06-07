@@ -1,4 +1,4 @@
-use angui::{ElementFixedWidthGrowingHeightTrait, Position, widgets::VerticalSeparator};
+use snake_gui::{ElementFixedWidthGrowingHeightTrait, Position, widgets::VerticalSeparator};
 
 use crate::PrintBackendCTX;
 

@@ -1,6 +1,6 @@
 mod widgets;
 
-use angui::Position;
+use snake_gui::Position;
 use glow::{Context, HasContext, NativeBuffer};
 
 // general backend architecture

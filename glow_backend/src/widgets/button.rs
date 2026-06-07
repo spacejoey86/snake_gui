@@ -1,4 +1,4 @@
-use angui::{
+use snake_gui::{
     ElementFixedSizeTrait, Position,
     widgets::{Button, ButtonResult, RectangleElement},
 };
@@ -17,7 +17,7 @@ impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult> for Button<
     fn render(
         self: Box<Self>,
         ctx: &mut GlowBackendContext,
-        top_left: angui::Position,
+        top_left: Position,
     ) -> ButtonResult {
         let mouse_down_offset = if self.down {
             Position::new(2, 2)
