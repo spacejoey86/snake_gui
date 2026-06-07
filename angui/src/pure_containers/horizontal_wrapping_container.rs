@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use crate::{
     ElementFixedSize, ElementFixedWidthGrowingHeight, position::Position,
     traits::ElementFixedSizeTrait,
@@ -11,119 +9,125 @@ use crate::{
 /// Allows element's height to grow to match the talles element in their row.
 /// Width of this container is the width of the widest row - this might be smaller than wrap_width
 pub struct HorizontalWrappingContainer<'a, BackendContext, UserState> {
-    children: Vec<Vec<ElementFixedWidthGrowingHeight<'a, BackendContext, UserState>>>,
+    rows_max_height: Vec<usize>,
+    last_row_width: usize,
+    max_row_width: usize,
+    render: Box<dyn 'a + FnOnce(&mut BackendContext, Position, usize) -> UserState>,
+
     h_spacing: usize,
     v_spacing: usize,
     wrap_width: usize,
-    phantom: PhantomData<BackendContext>,
 }
 
-impl<'a, BackendContext: 'static, UserState: 'static>
-    HorizontalWrappingContainer<'a, BackendContext, UserState>
-{
+impl<'a, BackendContext: 'a> HorizontalWrappingContainer<'a, BackendContext, ()> {
     pub fn new(h_spacing: usize, v_spacing: usize, wrap_width: usize) -> Self {
         Self {
-            children: vec![vec![]],
+            rows_max_height: vec![0],
+            last_row_width: 0,
+            max_row_width: 0,
+            render: Box::new(|_, _, _| ()),
+
             h_spacing,
             v_spacing,
             wrap_width,
-            phantom: PhantomData,
         }
     }
+}
 
-    // todo: replace with into
-    pub fn build(self) -> ElementFixedSize<'a, BackendContext, UserState> {
-        ElementFixedSize {
-            inner: Box::new(self).covariant_box(),
-        }
-    }
-
-    pub fn add_child<T: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, UserState>>>(
+impl<'a, BackendContext: 'a, PrevUserState: 'a>
+    HorizontalWrappingContainer<'a, BackendContext, PrevUserState>
+{
+    pub fn add_child<
+        T: Into<ElementFixedWidthGrowingHeight<'a, BackendContext, ChildUserState>>,
+        ChildUserState: 'a,
+        F: 'a + FnOnce(PrevUserState, ChildUserState) -> UserState,
+        UserState,
+    >(
         mut self,
         child: T,
-    ) -> Result<Box<Self>, ()> {
+        state_closure: F,
+    ) -> Result<HorizontalWrappingContainer<'a, BackendContext, UserState>, ()> {
         let child = child.into();
         if child.width() > self.wrap_width {
             return Err(());
         }
 
-        let last_row = self.children.last().unwrap();
-        let last_row_width = self.row_width(last_row);
-        if last_row_width + child.width() + last_row_width.min(1) > self.wrap_width {
-            // would overflow: create a new row
-            self.children.push(vec![])
-        }
-        self.children.last_mut().unwrap().push(child);
+        let child_height = child.min_height();
 
-        return Ok(Box::new(self));
-    }
+        let new_closure: Box<dyn 'a + FnOnce(&mut BackendContext, Position, usize) -> UserState> =
+            if self.last_row_width + self.h_spacing + child.width() > self.wrap_width {
+                // would overflow: create a new row
+                let closure_max_height = *self.rows_max_height.last().unwrap();
+                self.last_row_width = child.width();
+                let pos = Position::new(
+                    0,
+                    self.rows_max_height
+                        .iter()
+                        .map(|h| h + self.v_spacing)
+                        .sum::<usize>(),
+                );
+                self.rows_max_height.push(0);
+                let closure = move |ctx: &mut BackendContext, top_left, max_height| {
+                    let prev_rows_state = (self.render)(ctx, top_left, closure_max_height);
+                    let child_state = child.render(ctx, top_left + pos, max_height);
+                    (state_closure)(prev_rows_state, child_state)
+                };
+                Box::new(closure)
+            } else {
+                // stay on the same row
+                let pos = Position::new(
+                    self.last_row_width
+                        + if self.max_row_width == 0 {
+                            // don't add spacing before the first element
+                            0
+                        } else {
+                            self.h_spacing
+                        },
+                    self.rows_max_height
+                        .iter()
+                        .map(|h| h + self.v_spacing)
+                        .sum::<usize>()
+                        - self.rows_max_height.last().unwrap_or(&0)
+                        - self.v_spacing,
+                );
+                self.last_row_width += self.h_spacing + child.width();
 
-    fn row_width(
-        &self,
-        row: &Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>,
-    ) -> usize {
-        let spacing = if row.len() == 0 {
-            0
-        } else {
-            self.h_spacing * (row.len() - 1)
-        };
-        spacing + row.iter().map(|child| child.width()).sum::<usize>()
-    }
+                let closure = move |ctx: &mut BackendContext, top_left, max_height| {
+                    let prev_state = (self.render)(ctx, top_left, max_height);
+                    let child_state = child.render(ctx, top_left + pos, max_height);
+                    (state_closure)(prev_state, child_state)
+                };
 
-    fn row_height(row: &Vec<ElementFixedWidthGrowingHeight<BackendContext, UserState>>) -> usize {
-        row.iter()
-            .map(|child| child.min_height())
-            .max()
-            .unwrap_or(0)
-    }
+                Box::new(closure)
+            };
 
-    fn covariant<'b>(self: Box<Self>) -> HorizontalWrappingContainer<'b, BackendContext, UserState>
-    where
-        'a: 'b,
-    {
-        HorizontalWrappingContainer {
-            children: self
-                .children
-                .into_iter()
-                .map(|row| row.into_iter().map(|child| child.covariant()).collect())
-                .collect(),
+        let last = self.rows_max_height.last_mut().unwrap();
+        *last = (*last).max(child_height);
+        self.max_row_width = self.max_row_width.max(self.last_row_width);
+
+        Ok(HorizontalWrappingContainer {
+            rows_max_height: self.rows_max_height,
+            last_row_width: self.last_row_width,
+            max_row_width: self.max_row_width,
+            render: new_closure,
             h_spacing: self.h_spacing,
             v_spacing: self.v_spacing,
             wrap_width: self.wrap_width,
-            phantom: PhantomData,
-        }
+        })
     }
 }
 
-impl<'a, BackendContext: 'static, UserState: 'static>
-    ElementFixedSizeTrait<'a, BackendContext, UserState>
+impl<'a, BackendContext: 'a, UserState: 'a> ElementFixedSizeTrait<'a, BackendContext, UserState>
     for HorizontalWrappingContainer<'a, BackendContext, UserState>
 {
     fn width(&self) -> usize {
-        self.children
-            .iter()
-            .map(|row| self.row_width(row))
-            .max()
-            .unwrap_or(0)
+        self.max_row_width
     }
 
     fn height(&self) -> usize {
-        let spacing = if self.children.len() == 0 {
-            0
-        } else {
-            (self.children.len() - 1) * self.v_spacing
-        };
-
-        self.children
-            .iter()
-            .map(|row| {
-                row.iter()
-                    .map(|row_child| row_child.min_height())
-                    .max()
-                    .unwrap_or(0)
-            })
-            .sum::<usize>()
-            + spacing
+        let num_rows = self.rows_max_height.len();
+        let spacing = if num_rows == 0 { 0 } else { num_rows - 1 };
+        self.rows_max_height.iter().sum::<usize>() + spacing
     }
 
     fn render(
@@ -131,19 +135,7 @@ impl<'a, BackendContext: 'static, UserState: 'static>
         ctx: &mut BackendContext,
         top_left: crate::position::Position,
     ) -> UserState {
-        let mut y_offset = 0;
-        for row in self.children {
-            let mut x_offset = 0;
-            let height = HorizontalWrappingContainer::row_height(&row);
-            for child in row {
-                let width = child.width();
-                child.render(ctx, top_left + Position::new(x_offset, y_offset), height);
-                x_offset += width + self.h_spacing;
-            }
-            y_offset += height + self.v_spacing
-        }
-
-        todo!()
+        (self.render)(ctx, top_left, *self.rows_max_height.last().unwrap())
     }
 
     fn covariant_box<'b>(
@@ -152,6 +144,16 @@ impl<'a, BackendContext: 'static, UserState: 'static>
     where
         'a: 'b,
     {
-        Box::new(self.covariant())
+        self
+    }
+}
+
+impl<'a, BackendContext: 'a, UserState: 'a> Into<ElementFixedSize<'a, BackendContext, UserState>>
+    for HorizontalWrappingContainer<'a, BackendContext, UserState>
+{
+    fn into(self) -> ElementFixedSize<'a, BackendContext, UserState> {
+        ElementFixedSize {
+            inner: Box::new(self),
+        }
     }
 }

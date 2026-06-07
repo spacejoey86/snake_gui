@@ -11,19 +11,21 @@ use angui::{
 fn main() {
     let root = BorderContainer::new(
         HorizontalWrappingContainer::new(1, 1, 50)
-            .add_child(CharRectangle::new(30, 10, 'a'))
+            .add_child(CharRectangle::new(30, 10, 'a'), |_, _| ())
             .unwrap()
-            .add_child(VerticalSeparator::new())
+            .add_child(VerticalSeparator::new(), |_, _| ())
             .unwrap()
-            .add_child(PaddingContainer::all(Label::new("Test label"), 1))
+            .add_child(
+                PaddingContainer::all(Label::new("Test label"), 1),
+                |_, _| (),
+            )
             .unwrap()
-            .add_child(CharRectangle::new(5, 15, 'b'))
+            .add_child(CharRectangle::new(5, 15, 'b'), |_, _| ())
             .unwrap()
-            .add_child(HorizontalSpacer::new(1))
+            .add_child(HorizontalSpacer::new(1), |_, _| ())
             .unwrap()
-            .add_child(CharRectangle::new(3, 3, 'c'))
-            .unwrap()
-            .build(),
+            .add_child(CharRectangle::new(3, 3, 'c'), |_, _| ())
+            .unwrap(),
     );
 
     let mut ctx = PrintBackendCTX::new(root.width(), root.height()); // create a buffer that will fit the contents
