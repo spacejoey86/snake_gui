@@ -1,7 +1,7 @@
 use snake_gui::{
     ElementFixedSizeTrait, Position,
-    pure_containers::{HorizontalContainer, PaddingContainer},
-    widgets::{Button, Label, RectangleElement},
+    pure_containers::{FixedSizeContainer, HorizontalContainer, PaddingContainer},
+    widgets::{Button, Label, RectangleElement, Slider},
 };
 use glfw::{Action, Context, Key, MouseButton::Button1, fail_on_errors};
 use glow_backend::GlowBackendContext;
@@ -28,6 +28,9 @@ fn main() {
 
     let mut button_down = false;
     let mut second_button_down = false;
+
+    let mut slider_clicked = false;
+    let mut slider_val = 0;
 
     // Run the app:
     while !window.should_close() {
@@ -68,6 +71,10 @@ fn main() {
                         println!("clicked second button")
                     }
                     second_button_down = res.held
+                })
+                .add_child(FixedSizeContainer::new(150, 10, Slider::new(slider_clicked, slider_val)).unwrap(), |_, res| {
+                    slider_clicked = res.clicked;
+                    slider_val = res.val;
                 })
                 .add_child(
                     PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),

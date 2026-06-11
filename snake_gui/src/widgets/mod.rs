@@ -9,3 +9,6 @@ pub use separator::VerticalSeparator;
 
 mod button;
 pub use button::{Button, ButtonResult};
+
+mod slider;
+pub use slider::{Slider, SliderResult};
