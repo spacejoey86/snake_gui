@@ -37,7 +37,6 @@ impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, SliderResult>
         if top_left.inside_top_left(ctx.mouse_pos)
             && (handle_pos + Position::new(100, 10)).inside_bottom_right(ctx.mouse_pos)
         {
-            ctx.mouse_swallowed = true;
             if ctx.mouse_clicked {
                 clicked = true
             }

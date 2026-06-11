@@ -5,7 +5,9 @@ use snake_gui::{
 
 use crate::GlowBackendContext;
 
-impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult> for Button<GlowBackendContext> {
+impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult>
+    for Button<GlowBackendContext>
+{
     fn width(&self) -> usize {
         50
     }
@@ -14,11 +16,7 @@ impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult> for Button<
         30
     }
 
-    fn render(
-        self: Box<Self>,
-        ctx: &mut GlowBackendContext,
-        top_left: Position,
-    ) -> ButtonResult {
+    fn render(self: Box<Self>, ctx: &mut GlowBackendContext, top_left: Position) -> ButtonResult {
         let mouse_down_offset = if self.down {
             Position::new(2, 2)
         } else {
@@ -39,7 +37,7 @@ impl<'a> ElementFixedSizeTrait<'a, GlowBackendContext, ButtonResult> for Button<
             ctx.mouse_swallowed = true;
             ButtonResult {
                 clicked: ctx.mouse_clicked,
-                held: ctx.mouse_down,
+                held: ctx.mouse_down && self.down || ctx.mouse_clicked,
             }
         } else {
             ButtonResult {
