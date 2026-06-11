@@ -1,10 +1,10 @@
+use glfw::{Action, Context, Key, MouseButton::Button1, fail_on_errors};
+use glow_backend::GlowBackendContext;
 use snake_gui::{
-    ElementFixedSizeTrait, Position,
+    Position,
     pure_containers::{FixedSizeContainer, HorizontalContainer, PaddingContainer},
     widgets::{Button, Label, RectangleElement, Slider},
 };
-use glfw::{Action, Context, Key, MouseButton::Button1, fail_on_errors};
-use glow_backend::GlowBackendContext;
 
 fn main() {
     let mut glfw = glfw::init(fail_on_errors!()).unwrap();
@@ -59,7 +59,7 @@ fn main() {
             Position::new(mouse_pos.0.floor() as usize, mouse_pos.1.floor() as usize),
         );
 
-        Box::new(
+        Box::new(PaddingContainer::all(
             HorizontalContainer::new(10)
                 .add_child(RectangleElement::new(20, 50, 7), |_, _| ())
                 .add_child(RectangleElement::new(50, 200, 1), |_, _| ())
@@ -72,15 +72,20 @@ fn main() {
                     }
                     second_button_down = res.held
                 })
-                .add_child(FixedSizeContainer::new(150, 10, Slider::new(slider_clicked, slider_val)).unwrap(), |_, res| {
-                    slider_clicked = res.clicked;
-                    slider_val = res.val;
-                })
+                .add_child(
+                    FixedSizeContainer::new(150, 10, Slider::new(slider_clicked, slider_val))
+                        .unwrap(),
+                    |_, res| {
+                        slider_clicked = res.clicked;
+                        slider_val = res.val;
+                    },
+                )
                 .add_child(
                     PaddingContainer::all(Label::new("TEST TEXT 'n'"), 4),
                     |_, _| (),
                 ),
-        )
+            2,
+        ))
         .render(&mut ctx, Position::new(0, 0));
         ctx.display();
 

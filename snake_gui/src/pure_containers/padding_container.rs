@@ -61,8 +61,8 @@ impl<'a, BackendContext: 'static, UserState: 'static>
     }
 
     /// Create a padding container with the same padding on each side
-    pub fn all(
-        child: ElementFixedSize<'a, BackendContext, UserState>,
+    pub fn all<T: Into<ElementFixedSize<'a, BackendContext, UserState>>>(
+        child: T,
         padding: usize,
     ) -> ElementFixedSize<'a, BackendContext, UserState> {
         ElementFixedSize {
@@ -71,7 +71,7 @@ impl<'a, BackendContext: 'static, UserState: 'static>
                 right: padding,
                 top: padding,
                 bottom: padding,
-                child,
+                child: child.into(),
             })
             .covariant_box(),
         }
