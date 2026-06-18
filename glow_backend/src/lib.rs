@@ -57,7 +57,8 @@ struct Rect {
 
 const VERTEX_SHADER_SOURCE: &str = "
 #version 330 core
-layout (location = 0) in vec2 vertexPos; // same for all instances
+// same for all instances
+layout (location = 0) in vec2 vertexPos; // (0,0) to (1,1)
 // instance data, different for each instance
 layout (location = 1) in vec2 instanceOffset;
 layout (location = 2) in vec2 instanceSize;
